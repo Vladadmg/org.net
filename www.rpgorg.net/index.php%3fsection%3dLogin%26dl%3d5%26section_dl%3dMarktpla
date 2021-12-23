@@ -1,0 +1,667 @@
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//DE"
+       "http://www.rpgOrg.net">
+<html>
+<head>
+	<title>rpgOrg</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<meta name="keywords" content="Soziales Netzwerk, Social network, Rollenspiel, community, RPG, LARP, MMO">
+
+	<link rel="shortcut icon" type="image/x-icon" href="images/sonst/favicon.ico" />
+	<link href="style.css" rel="stylesheet" type="text/css">
+	
+	<!-- link calendar files  -->
+	<script language="JavaScript" src="Bauteile/calendar/calendar_eu.js"></script>
+	<link rel="stylesheet" href="Bauteile/calendar/calendar.css">
+</head>
+
+
+
+
+<body BGCOLOR=#550000 BACKGROUND='images/Flueche/.gif' >
+
+
+		
+		<script type='text/javascript'>
+			<!--
+				var d = new Date();
+				var c_hour = d.getHours();
+				var c_min = d.getMinutes();
+				
+				var xmlhttp;
+				if (window.XMLHttpRequest) {   // If client uses Firefox, IE7+ Chrome, Opera, Safari
+					xmlhttp = new XMLHttpRequest();
+				} else {									// Old versions of internet explorer
+					xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+				}
+				
+				xmlhttp.open("GET","Bauteile/set_LocalTime_Session.php?hour_client="+c_hour+"&minute_client="+c_min+"&SID=5gg3skjk8t0sdocjss16uqe5f6",true);
+				xmlhttp.send();
+			//-->
+		</script>
+	
+	
+	<script type="text/javascript">
+		// ------------------------------------------------
+		//    functions for setting opacity of elements
+		// ------------------------------------------------
+		function FadeOpacity (htmlObjectID, CurrentValue, TargetValue, MillisForFullFade) {
+			setOpacity (htmlObjectID, CurrentValue);
+			var NewValue = CurrentValue  +  (50/MillisForFullFade);
+			if (NewValue > TargetValue) {
+				NewValue = TargetValue;
+			}
+			if (NewValue > CurrentValue) {
+				setTimeout( "FadeOpacity('"+htmlObjectID+"', "+NewValue+", "+TargetValue+", "+MillisForFullFade+");" , 50);
+			}
+		}	
+				
+		function setOpacity (htmlObjectID, opacityValue) {
+			if (window.ActiveXObject) {
+				document.getElementById(htmlObjectID).style.filter = "alpha(opacity=" + opacityValue*100 + ")"; // IE
+			} else {
+				document.getElementById(htmlObjectID).style.opacity = opacityValue; // Gecko/Opera
+			}
+		}
+		
+		function sleep(Millis) {
+			Millis += new Date().getTime();
+			while (new Date() < Millis) {  /* do nothing */  }
+		}
+					
+		// ------------------------------------------------
+		//    reactivates the login using ajax
+		// ------------------------------------------------
+		var lastRefresh = parseInt( new Date().getTime() / 1000 );	// in seconds
+		function RefreshLogin() {
+			var CurrenTime = parseInt( new Date().getTime() / 1000 );	// in seconds
+			if (CurrenTime - lastRefresh > 705) {		// refresh login if only 15 seconds are left until automatic logout
+				lastRefresh = parseInt( new Date().getTime() / 1000 );	// in seconds
+				
+				var xmlhttp;
+				if (window.XMLHttpRequest) {	// code for IE7+, Firefox, Chrome, Opera, Safari
+					xmlhttp=new XMLHttpRequest();
+				} else {						// code for IE6, IE5
+					xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+				}
+				
+				xmlhttp.open("GET","Ajax/RefreshLogin/RefreshLogin.php?SID=5gg3skjk8t0sdocjss16uqe5f6", true);
+				xmlhttp.send();		// load the php-page
+			}
+			setTimeout('RefreshLogin()', 5000);   	// call function again in 5 seconds
+		}
+		
+		
+		
+		// ------------------------------------------------
+		//          Functions to handle new events
+		// ------------------------------------------------
+		var lastRefresh_NewEvents = parseInt( 0 );	// in seconds  (set to zero to make sure it is called immidiately)
+		function RefreshNewEvents() {
+			var CurrenTime = parseInt( new Date().getTime() / 1000 );	// in seconds
+			if (CurrenTime - lastRefresh_NewEvents > 600) {		// check for news if last check is more than RefreshNewEventsTimeout ago
+				lastRefresh_NewEvents = parseInt( new Date().getTime() / 1000 );	// in seconds
+				
+				var xmlhttp;
+				if (window.XMLHttpRequest) {	// code for IE7+, Firefox, Chrome, Opera, Safari
+					xmlhttp=new XMLHttpRequest();
+				} else {						// code for IE6, IE5
+					xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+				}
+				
+				xmlhttp.onreadystatechange = function() {
+			  		if (xmlhttp.readyState==4 && xmlhttp.status==200) {	// when loaded:
+						eval( xmlhttp.responseText );
+				 	}
+				}
+				
+				xmlhttp.open("GET","Ajax/RefreshLogin/CheckForNews.php?SID=5gg3skjk8t0sdocjss16uqe5f6", true);
+				xmlhttp.send();		// load the php-page
+			}
+
+			setTimeout('RefreshNewEvents()', 5000);   	// call function again in 5 seconds
+		}
+		
+		
+		try {
+			NewsAlertObject = new Audio("");			// starts to load sound file when page is loaded
+			ChatAlertObject = new Audio("");			// starts to load sound file when page is loaded
+			if ( (NewsAlertObject.canPlayType("audio/wav")!='no') && (NewsAlertObject.canPlayType("audio/wav")!='') ) {
+				NewsAlertObject = new Audio("NewsAlert.wav"); 		// check if WAVE is suppoerted
+				ChatAlertObject = new Audio("http://chat.rpgorg.net/bird.wav"); 		// check if WAVE is suppoerted
+			} else if ( (NewsAlertObject.canPlayType("audio/mp3")!='no') && (NewsAlertObject.canPlayType("audio/mp3")!='') ) {
+				NewsAlertObject = new Audio("NewsAlert.mp3"); 		// check if MP3 is suppoerted
+				ChatAlertObject = new Audio("http://chat.rpgorg.net/bird.mp3"); 		// check if MP3 is suppoerted
+			} else if ( (NewsAlertObject.canPlayType("audio/ogg")!='no') && (NewsAlertObject.canPlayType("audio/ogg")!='') ) {
+				NewsAlertObject = new Audio("NewsAlert.ogg"); 		// check if OGG is suppoerted
+				ChatAlertObject = new Audio("http://chat.rpgorg.net/bird.ogg"); 		// check if OGG is suppoerted
+			}
+		} catch (e) { }
+		function PlayNewsAlert () {
+			try {	// try method 1	
+				NewsAlertObject.play();
+			} catch (e) {
+			}
+		}
+		function PlayChatAlert () {
+			try {	// try method 1	
+				ChatAlertObject.play();
+			} catch (e) {
+			}
+		}
+	
+		var step_ShowNewsInTitle = 1;
+		var timer_ShowNewsInTitle;
+		function ShowNewsInTitle() {
+			clearTimeout(timer_ShowNewsInTitle);	// makes sure only that there are not two overlapping executions
+			if (focused == false) {		// show animation only if window is not focused
+				switch (step_ShowNewsInTitle) {
+					case 1: document.title = "NEUIGKEITEN"; 
+							break;
+					case 2: document.title = "rpgOrg";
+							step_ShowNewsInTitle = 0;
+							break;				   
+				}
+				step_ShowNewsInTitle++;
+				timer_ShowNewsInTitle = setTimeout("ShowNewsInTitle()", 1250);
+			} else {
+				document.title = "rpgOrg";
+			}
+		}
+		
+		// Function to check weather tab has the focus. Variable "focused" will contain the information if currently focused or not
+		var focused = true;
+		function onBlur() {
+			focused = false;
+		};
+		function onFocus(){
+			focused = true;
+		};
+		if (/*@cc_on!@*/false) { 		// Internet Explorer
+			document.onfocusin = onFocus;
+			document.onfocusout = onBlur;
+		} else {									// Firefox
+			window.onfocus = onFocus;
+			window.onblur = onBlur;
+		}		
+		
+		
+		
+		function HideAllttt() {
+			try {
+				ttt_objects = document.getElementsByClassName("My_ttt");
+				for(i=0; i<ttt_objects.length; i++) {  
+					ttt_objects[i].style.display = "none";  
+				} 
+			} catch (e) { }
+		}
+
+
+
+
+
+	(
+		function(window, document, undefined) {
+			var My_ttt = function( element, Config_, ttt_object) {
+				var config = {
+					id: Config_.id|| undefined,
+					className: Config_.className || undefined,
+					text: Config_.text || undefined
+				};
+				var over_event = function(event) {
+					ttt_object.style.display = "block";
+				},
+				out_event = function(event) {
+					ttt_object.style.display = "none";
+				},
+				move_event = function(event) {
+					event = event ? event : window.event;
+					if ( event.pageX == null && event.clientX != null ) {
+						event.pageX = event.clientX + (document.documentElement && document.documentElement.scrollLeft || document.body && document.body.scrollLeft || 0) - (document.documentElement && document.documentElement.clientLeft || document.body && document.body.clientLeft || 0);
+						event.pageY = event.clientY + (document.documentElement && document.documentElement.scrollTop  || document.body && document.body.scrollTop  || 0) - (document.documentElement && document.documentElement.clientTop  || document.body && document.body.clientTop  || 0);
+					}
+					
+					//Set Y Position of ttt-DIV
+					if (event.pageY-window.pageYOffset > 0.66*window.innerHeight) {
+						ttt_object.style.top = (event.pageY-ttt_object.offsetHeight-8) + "px";
+					} else {
+						ttt_object.style.top = (event.pageY+20) + "px";
+					}
+					//Set Y Position of ttt-DIV
+					if (event.pageX-window.pageXOffset > 0.66*window.innerWidth) {
+						ttt_object.style.left = (event.pageX-ttt_object.offsetWidth-8) + "px";
+					} else {
+						ttt_object.style.left = (event.pageX+20) + "px";
+					}
+				}
+				if (ttt_object === undefined && config.id) {
+					ttt_object = document.getElementById(config.id);
+					if (ttt_object) ttt_object = ttt_object.parentNode.removeChild(ttt_object)
+				}
+				if (ttt_object === undefined && config.text) {
+					ttt_object = document.createElement("div");
+					if (config.id) ttt_object.id= config.id;
+					ttt_object.innerHTML = config.text;
+				}
+				if (config.className) ttt_object.className = config.className;
+				ttt_object = document.body.appendChild(ttt_object);
+				ttt_object.style.position = "absolute";
+				// define functions that are called on mouse events
+				element.onmouseover = over_event;
+				element.onmouseout = out_event;
+				element.onmousemove = move_event;
+				over_event();
+			};
+			window.My_ttt = window.XBT = My_ttt;
+		}
+	)
+	
+	(
+		this, this.document
+	);
+
+	</script>
+
+		<center>
+
+			<noscript>	
+				<div style='color:red; background-color:black'>
+					<br>
+					<b>Bei deinem Browser ist JavaScript deaktiviert! <br>
+					Bitte aktiviere es, um diese Website in vollem Umfang nutzen zu können.</b>
+					<br><br>
+				</div>
+			</noscript>
+
+
+			<table border="0" cellspacing="0" cellpadding="0" height="159" style="width:500px; table-layout:fixed;">
+				<tr>
+					<td width="240" height="159" style="text-align:right; background-image:url(images/bg/rolle/bg_obenl.gif)" valign="bottom">
+					</td>
+					<td width="640" style="background-image:url(images/bg/rolle/bg_obenm.gif)"> 
+						<table border="0" cellspacing="0" cellpadding="0">
+							<tr width="640"> 
+								<td rowspan='2' width='170' style='text-align:center;'> <a class="WhiteRedHover" href="index.php?section=Home"><img src='images/bg/rolle/orkkopf.gif' alt=''/></a> </td>
+								<td width="405" height="90"> <img src='images/bg/rolle/titel.gif' alt='rpgOrg - Dein RPG-Organizer'/> </td>
+								<td width='65'><br><form method='post' name='set_language_form'>
+															<input type="hidden" name='set_language'/>
+															<input type='hidden' name='token' value='deb7f6784abe7cc3b620ac0fd62dd795'>
+															<input type="image" src="images/sonst/flag_de_de.gif" onclick='document.set_language_form.set_language.value="de"; document.set_language_form.submit();'/>  <br>
+															<input type="image" src="images/sonst/flag_en_de.gif" onclick='document.set_language_form.set_language.value="en"; document.set_language_form.submit();'/>
+														</form>
+								</td>
+							</tr>
+							<tr> 
+								<td colspan='2'>
+									
+<div align="right"> 
+<DIV style="display: inline"><a href="index.php?section=VeranstAll&Year=2012&Month=10&Day=3"><img src="images/menu/veranst.gif" style="border: 0px" alt="Events"></a></DIV>
+&nbsp; 
+<DIV style="display: inline"><a href="index.php?section=Marktpla"><img id="menuMarktplatz" src="images/menu/marktsch.gif" style="border: 0px" alt="Marktschreier"></a></DIV>
+&nbsp; 
+<DIV style="display: inline"><a href="index.php?section=RankingOverview"><img src="images/menu/ranking.gif" style="border: 0px" alt="Ranking"></a></DIV> 
+&nbsp; &nbsp; 
+<br>
+<DIV style="display: inline"><a href="index.php?section=Suche"><img src="images/menu/suche.gif" style="border: 0px" alt="Suche"></a></DIV>
+&nbsp; &nbsp; 
+<DIV style="display: inline"><a href="index.php?section=Invite"><img src="images/menu/einladen.gif" style="border: 0px" alt="Einladen"></a></DIV> 
+&nbsp; &nbsp; 
+<DIV style="display: inline"><a href="index.php?section=Help"><img src="images/menu/hilfe.gif" style="border: 0px" alt="Hilfe"></a></DIV>
+&nbsp; &nbsp; 
+<DIV style="display: inline"><a href="index.php?section=Foren"><img id="menuForen" src="images/menu/foren.gif" style="border: 0px" alt="Foren"></a></DIV> 
+&nbsp; &nbsp; 
+<DIV style='display: inline'><a href='index.php?section=Login'><img src='images/menu/login.gif' style='border: 0px' alt='Login'></a></DIV>&nbsp; &nbsp; 
+</div>
+
+
+<div id="NewBarkerDiv"  style="line-height: 160%; display: none; position: absolute; border: 0px black solid; width:28px; height:25px; background-image: url(images/menu/sprechbl.gif); text-align:center;" onmouseover="XBT(this, {id:'ttt_NewBarker'})"> </div>
+<div id="NewForenDiv"  style="line-height: 160%; display: none; position: absolute; border: 0px black solid; width:28px; height:25px; background-image: url(images/menu/sprechbl.gif); text-align:center;" onmouseover="XBT(this, {id:'ttt_NewForen'})"> </div>
+
+<div id="ttt_NewBarker" class="My_ttt" style="padding: 10px; max-width: 400px; border:1px solid #000000; background-image: url(images/ttt/ttt_bg.jpg)">
+	Neuigkeiten auf dem Marktplatz.
+</div>
+<div id="ttt_NewForen" class="My_ttt" style="padding: 10px; max-width: 400px; border:1px solid #000000; background-image: url(images/ttt/ttt_bg.jpg)">
+	Neuigkeiten in den Foren.
+</div>								</td>
+							</tr>
+						</table>
+					</td>
+					<td width="96" style="background-image:url(images/bg/rolle/bg_obenr.gif)"></td>
+				</tr>
+				<tr>
+					<td width="200" valign=top style="height:450px; padding:20px;"> <br><br><br><br><br><br><img src="images/bg_left/wuerfel_3.gif" style="border: 0px" alt=""> </td>
+					<td width="600" valign=top style="padding:20px; overflow:hidden; background-image:url(images/bg/rolle/bg_mitte.jpg)"> 
+						
+
+	<center>
+					<table width='600' height='510' border="0" style="background-image:url(images/Login/strasse.gif);">
+						<tr height='273px'>
+							<td width='5'> </td>
+							<td style='vertical-align:top;' width='210'> 
+
+								<div name='platzhalter' style='height:5px; display:block;'> </div>
+								<div style='font-size:12px'>
+									<form method="POST">
+										<label style='font-style:italic'>Benutzername: <br><input type="text" name="Username_Login" id="Username_Login" style="width:100%; background-image: url('images/bg/bg_med.gif');" id="Login_Username" style="background-image: url('images/bg/bg_med.gif');"
+																value=""/></label>
+										<script type="text/javascript">
+											document.getElementById("Username_Login").focus();;
+										</script>
+										<div name='platzhalter' style='height:5px; display:block;'> </div>
+										<label style='font-style:italic'>Password: <br><input type="password" name="Password" style="width:130px; background-image: url('images/bg/bg_dunkl.gif');"
+																value=""/></label>
+										<div style='float:right;'> 
+											<input type="submit" value="Login">
+										</div>
+										<input type='hidden' name='token' value='deb7f6784abe7cc3b620ac0fd62dd795'>
+									</form> 
+									<div name='platzhalter' style='height:5px; display:block;'> </div>
+									<a href="index.php?section=register1"><b>Neuen Account erstellen</b></a>
+									<br> <div name='platzhalter' style='height:5px; display:block;'> </div>
+									<a href="index.php?section=ActivationMail">Aktivierungslink erneut zuschicken?</a>
+									<br> <div name='platzhalter' style='height:5px; display:block;'> </div>
+									<a href="index.php?section=ForgotPW">Passwort vergessen?</a>
+								</div>
+							</td>
+							<td width='10px'> </td>
+							<td style='vertical-align:bottom; text-align:center'>
+								<div style='height:85px; width:100%; display:block; text-align:center'> </div>
+							</td>
+						</tr><tr height='100%'>
+							<td></td>
+							<td></td>
+							<td></td>
+							<td colspan='1' valign='top'>
+								<ul style='font-style: italic'>
+										<li style='margin-bottom:8px'><b>Vernetze dich</b> mit anderen Spielern jeglicher Art</li>							
+										<li style='margin-bottom:8px'><b>Präsentiere dich</b> und deine Spielweise</li>							
+										<li style='margin-bottom:8px'><b>Finde Spielgruppen</b> und Spieler in deiner Nähe</li>							
+										<li style='margin-bottom:8px'>Organisiere deine Gruppen und <b>plane Termine</b></li>							
+										<li style='margin-bottom:8px'>Nutze das <b>Forum</b>, um dich auszutauschen</li>							
+										<li style='margin-bottom:8px'>Erstelle und präsentiere deine <b>Charaktere</b></li>													
+										<li style='margin-bottom:8px'><b>Charakter interagieren</b> mit Charakteren</li>													
+										<li style='margin-bottom:8px'>Plane und finde <b>Veranstaltungen</b></li>													
+										<li style='margin-bottom:8px'>Und vieles mehr (Geschenke, Flüche, Gold, ...)</li>
+								</ul>
+							</td>
+						</tr>
+					</table>
+				
+				
+
+	</center>
+
+
+
+
+	
+	
+ 
+					</td>
+					<td></td>
+				</tr>
+				<tr valign="top">
+					<td width="240" height="195" valign="top"> &nbsp; </td>
+					<td colspan='2' width="640" valign="top" height="60" style="background-image:url(images/bg/rolle/bg_unten.gif)"> 
+						<table border='0'>
+							<tr height='98'></tr>	
+							<tr>
+								<td width='205'></td>					
+								<td><br>
+
+<div align="right" style='white-space:nowrap;'> <a href="index.php?section=About">Über uns</a> &nbsp; <a href="index.php?section=Contact">Kontakt</a> &nbsp; <a href="index.php?section=VRegeln">Verhaltensregeln</a> &nbsp; <a href="index.php?section=Datenschutz">Datenschutz</a> &nbsp; <a href="index.php?section=AGB">AGB</a> &nbsp; <a href="index.php?section=Impressum">Impressum</a> &nbsp; &nbsp; </div></td>					
+							</tr>			
+						</table>
+						
+					</td>
+				</tr>
+			</table>
+		
+		</center>
+
+
+
+
+
+
+<script language ='JavaScript'>
+
+	function SetPositionHomeNewsDiv() {
+		// Get the divs that I need
+		var Home_div = document.getElementById('menuitem1');
+		var HomeNews_div = document.getElementById('NewsInHome');
+
+		var Obj = Home_div;
+		var Pos_Left = 0;
+		var Pos_Top = 0;
+		while (Obj){
+			Pos_Left += Obj.offsetLeft;
+			Pos_Top += Obj.offsetTop;
+			Obj = Obj.offsetParent;
+		}
+
+		// Set new position of the "NewMessage_div"
+		HomeNews_div.style.top = (Pos_Top-Home_div.offsetHeight*0.4) + 'px';
+		HomeNews_div.style.left = (Pos_Left+Home_div.offsetWidth-HomeNews_div.offsetWidth*0.5) + 'px';
+	}
+	document.getElementById('NewsInHome').innerHTML = "&nbsp; &nbsp;";
+		SetPositionHomeNewsDiv();
+		
+		
+	function SetPositionNewMessageDiv() {
+		// Get the divs that I need
+		var Botend_div = document.getElementById('menuitem7');
+		var NewMessage_div = document.getElementById('NewMessagesDiv');
+
+		var Obj = Botend_div;   //Get position of "Botendienst"-Div
+		var Pos_Left = 0;
+		var Pos_Top = 0;
+		while (Obj){
+			Pos_Left += Obj.offsetLeft;
+			Pos_Top += Obj.offsetTop;
+			Obj = Obj.offsetParent;
+		}
+
+		// Set new position of the "NewMessage_div"
+		NewMessage_div.style.top = (Pos_Top-NewMessage_div.offsetHeight*0.4) + 'px';
+		NewMessage_div.style.left = (Pos_Left+Botend_div.offsetWidth-NewMessage_div.offsetWidth*0.5) + 'px';
+	}
+		SetPositionNewMessageDiv();
+	
+	
+	function SetPositionGroupNewsDiv(){
+		// Get the divs that I need
+		var Gruppen_div = document.getElementById('menuitem5');
+		var GroupNews_div = document.getElementById('NewsInGroupDiv');
+
+		var Obj = Gruppen_div;   //Get position of "Botendienst"-Div
+		var Pos_Left = 0;
+		var Pos_Top = 0;
+		while (Obj){
+			Pos_Left += Obj.offsetLeft;
+			Pos_Top += Obj.offsetTop;
+			Obj = Obj.offsetParent;
+		}
+
+		// Set new position of the "NewMessage_div"
+		GroupNews_div.style.top = (Pos_Top-GroupNews_div.offsetHeight*0.4) + 'px';
+		GroupNews_div.style.left = (Pos_Left+Gruppen_div.offsetWidth-GroupNews_div.offsetWidth*0.5) + 'px';
+	}
+	SetPositionGroupNewsDiv();	
+	
+	
+	function SetPositionGildenNewsDiv(){
+		// Get the divs that I need
+		var Gilden_div = document.getElementById('menuitem8');
+		var GildenNews_div = document.getElementById('NewsInGildenDiv');
+
+		var Obj = Gilden_div;   //Get position of "Botendienst"-Div
+		var Pos_Left = 0;
+		var Pos_Top = 0;
+		while (Obj){
+			Pos_Left += Obj.offsetLeft;
+			Pos_Top += Obj.offsetTop;
+			Obj = Obj.offsetParent;
+		}
+
+		// Set new position of the "NewMessage_div"
+		GildenNews_div.style.top = (Pos_Top-GildenNews_div.offsetHeight*0.4) + 'px';
+		GildenNews_div.style.left = (Pos_Left+Gilden_div.offsetWidth-GildenNews_div.offsetWidth*0.5) + 'px';
+	}
+
+	SetPositionGildenNewsDiv();
+
+
+	function SetPositionNewRuhmCharDiv(){
+		// Get the divs that I need
+		var MeineChars_div = document.getElementById('menuitem6');
+		var NewRuhmChar_div = document.getElementById('NewRuhmCharDiv');
+
+		var Obj = MeineChars_div;   //Get position of "Botendienst"-Div
+		var Pos_Left = 0;
+		var Pos_Top = 0;
+		while (Obj){
+			Pos_Left += Obj.offsetLeft;
+			Pos_Top += Obj.offsetTop;
+			Obj = Obj.offsetParent;
+		}
+
+		// Set new position of the "NewMessage_div"
+		NewRuhmChar_div.style.top = (Pos_Top-NewRuhmChar_div.offsetHeight*0.4) + 'px';
+		NewRuhmChar_div.style.left = (Pos_Left+MeineChars_div.offsetWidth-NewRuhmChar_div.offsetWidth*0.5) + 'px';
+	}
+	SetPositionNewRuhmCharDiv();
+
+
+	function SetPositionGalleryNewsDiv() {
+		// Get the divs that I need
+		var Avatar_div = document.getElementById('menuitem2');
+		var GalleryNews_div = document.getElementById('NewsInGallery');
+
+		var Obj = Avatar_div;   //Get position of "Botendienst"-Div
+		var Pos_Left = 0;
+		var Pos_Top = 0;
+		while (Obj){
+			Pos_Left += Obj.offsetLeft;
+			Pos_Top += Obj.offsetTop;
+			Obj = Obj.offsetParent;
+		}
+
+		// Set new position of the "NewMessage_div"
+		GalleryNews_div.style.top = (Pos_Top-GalleryNews_div.offsetHeight*0.4) + 'px';
+		GalleryNews_div.style.left = (Pos_Left+Avatar_div.offsetWidth/2-GalleryNews_div.offsetWidth*0.5) + 'px';
+	}
+	SetPositionGalleryNewsDiv();	
+	
+	
+	function SetPositionNewBarkerDiv() {
+		// Get the divs that I need
+		var Marktpl_div = document.getElementById('menuMarktplatz');
+		var NewBarker_div = document.getElementById('NewBarkerDiv');
+	
+		var Obj = Marktpl_div;   //Get position of "Botendienst"-Div
+		var Pos_Left = 0;
+		var Pos_Top = 0;
+		while (Obj){
+			Pos_Left += Obj.offsetLeft;
+			Pos_Top += Obj.offsetTop;
+			Obj = Obj.offsetParent;
+		}
+	
+		// Set new position of the "NewMessage_div"
+		NewBarker_div.style.top = (Pos_Top-NewBarker_div.offsetHeight*0.4) + 'px';
+		NewBarker_div.style.left = (Pos_Left+Marktpl_div.offsetWidth-NewBarker_div.offsetWidth*0.5) + 'px';
+	}	
+	SetPositionNewBarkerDiv();
+	
+	
+	function SetPositionNewForenDiv() {
+		// Get the divs that I need
+		var Forum_div = document.getElementById('menuForen');
+		var NewForen_div = document.getElementById('NewForenDiv');
+
+		var Obj = Forum_div;   //Get position of "Forum"-Div
+		var Pos_Left = 0;
+		var Pos_Top = 0;
+		while (Obj){
+			Pos_Left += Obj.offsetLeft;
+			Pos_Top += Obj.offsetTop;
+			Obj = Obj.offsetParent;
+		}
+
+		// Set new position of the "NewMessage_div"
+		NewForen_div.style.top = (Pos_Top-NewForen_div.offsetHeight*0.4) + 'px';
+		NewForen_div.style.left = (Pos_Left+Forum_div.offsetWidth-NewForen_div.offsetWidth*0.5) + 'px';
+	}
+	SetPositionNewForenDiv();
+
+
+
+	function SetDivPositions()	{
+		try {
+			SetPositionNewForenDiv();
+		} catch(err) {      }
+		try {										//Alle SetPositions in Try-Blöcke damit falls eine SetPosition Funktion nicht existiert die nÃ¤chste aufgerufen wird
+			SetPositionNewBarkerDiv();
+		} catch(err) {		}
+		try {
+			SetPositionNewMessageDiv();
+		} catch(err) {		}
+		try {
+			SetPositionGroupNewsDiv();
+		} catch(err) {		}
+		try {
+			SetPositionGildenNewsDiv();
+		} catch(err) {		}
+		try {
+			SetPositionGalleryNewsDiv();
+		} catch(err) {		}
+		try {
+			SetPositionNewRuhmCharDiv();
+		} catch(err) {		}
+	}
+	window.onresize = function () {
+		SetDivPositions();
+	}
+	window.onload = function () {
+		SetDivPositions();
+	}
+	window.onchange = function () {
+		SetDivPositions();
+	}
+				
+
+	setTimeout('HideAllttt();', 25);
+	setTimeout('HideAllttt();', 50);
+	setTimeout('HideAllttt();', 100);
+	setTimeout('HideAllttt();', 250);
+	setTimeout('HideAllttt();', 500);
+</script>
+
+
+
+
+
+
+<!-- Piwik -->
+<script type="text/javascript">
+	var pkBaseURL = (("https:" == document.location.protocol) ? "https://stats.rpgorg.net/piwik/" : "http://stats.rpgorg.net/piwik/");
+	document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+	try {
+		var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 1);
+		piwikTracker.trackPageView();
+		piwikTracker.enableLinkTracking();
+	} catch( err ) {}
+</script><noscript><p><img src="http://stats.rpgorg.net/piwik/piwik.php?idsite=1&amp;rec=1" style="border:0" alt="" /></p></noscript>
+<!-- End Piwik Tracking Code -->
+
+
+
+
+
+
+</body>
+</html>

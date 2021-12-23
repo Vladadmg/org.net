@@ -1,0 +1,834 @@
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//DE"
+       "http://www.rpgOrg.net">
+<html>
+<head>
+	<title>rpgOrg</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<meta name="keywords" content="Soziales Netzwerk, Social network, Rollenspiel, community, RPG, LARP, MMO">
+
+	<link rel="shortcut icon" type="image/x-icon" href="images/sonst/favicon.ico" />
+	<link href="style.css" rel="stylesheet" type="text/css">
+	
+	<!-- link calendar files  -->
+	<script language="JavaScript" src="Bauteile/calendar/calendar_eu.js"></script>
+	<link rel="stylesheet" href="Bauteile/calendar/calendar.css">
+</head>
+
+
+
+
+<body BGCOLOR=#550000 BACKGROUND='images/Flueche/.gif' >
+
+
+		
+		<script type='text/javascript'>
+			<!--
+				var d = new Date();
+				var c_hour = d.getHours();
+				var c_min = d.getMinutes();
+				var c_day = d.getDay();
+				if (c_day == 0) {
+					c_day = 7;	// make compatible with sunday in php. There it is 7.
+				}
+				
+				var xmlhttp;
+				if (window.XMLHttpRequest) {   // If client uses Firefox, IE7+ Chrome, Opera, Safari
+					xmlhttp = new XMLHttpRequest();
+				} else {									// Old versions of internet explorer
+					xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+				}
+				
+				xmlhttp.open("GET","Bauteile/set_LocalTime_Session.php?hour_client="+c_hour+"&minute_client="+c_min+"&day_client="+c_day+"&SID=lngg6f8lgr22o2cftgk0fjtvu1",true);
+				xmlhttp.send();
+			//-->
+		</script>
+<script type='text/javascript'>
+					<!--
+						setTimeout ( 'window.location.reload()', 10);
+					//-->
+				</script>	
+	
+	<script type="text/javascript">
+		// ------------------------------------------------
+		//    functions for setting opacity of elements
+		// ------------------------------------------------
+		function FadeOpacity (htmlObjectID, CurrentValue, TargetValue, MillisForFullFade) {
+			setOpacity (htmlObjectID, CurrentValue);
+			var NewValue = CurrentValue  +  (50/MillisForFullFade);
+			if (NewValue > TargetValue) {
+				NewValue = TargetValue;
+			}
+			if (NewValue > CurrentValue) {
+				setTimeout( "FadeOpacity('"+htmlObjectID+"', "+NewValue+", "+TargetValue+", "+MillisForFullFade+");" , 50);
+			}
+		}	
+				
+		function setOpacity (htmlObjectID, opacityValue) {
+			if (window.ActiveXObject) {
+				document.getElementById(htmlObjectID).style.filter = "alpha(opacity=" + opacityValue*100 + ")"; // IE
+			} else {
+				document.getElementById(htmlObjectID).style.opacity = opacityValue; // Gecko/Opera
+			}
+		}
+		
+		function sleep(Millis) {
+			Millis += new Date().getTime();
+			while (new Date() < Millis) {  /* do nothing */  }
+		}
+					
+		// ------------------------------------------------
+		//    reactivates the login using ajax
+		// ------------------------------------------------
+		var lastRefresh = parseInt( new Date().getTime() / 1000 );	// in seconds
+		function RefreshLogin() {
+			var CurrenTime = parseInt( new Date().getTime() / 1000 );	// in seconds
+			if (CurrenTime - lastRefresh > 705) {		// refresh login if only 15 seconds are left until automatic logout
+				lastRefresh = parseInt( new Date().getTime() / 1000 );	// in seconds
+				
+				var xmlhttp;
+				if (window.XMLHttpRequest) {	// code for IE7+, Firefox, Chrome, Opera, Safari
+					xmlhttp=new XMLHttpRequest();
+				} else {						// code for IE6, IE5
+					xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+				}
+				
+				xmlhttp.open("GET","Ajax/RefreshLogin/RefreshLogin.php?SID=lngg6f8lgr22o2cftgk0fjtvu1", true);
+				xmlhttp.send();		// load the php-page
+			}
+			setTimeout('RefreshLogin()', 5000);   	// call function again in 5 seconds
+		}
+		
+		
+		
+		// ------------------------------------------------
+		//          Functions to handle new events
+		// ------------------------------------------------
+		var lastRefresh_NewEvents = parseInt( 0 );	// in seconds  (set to zero to make sure it is called immidiately)
+		function RefreshNewEvents() {
+			var CurrenTime = parseInt( new Date().getTime() / 1000 );	// in seconds
+			if (CurrenTime - lastRefresh_NewEvents > 600) {		// check for news if last check is more than RefreshNewEventsTimeout ago
+				lastRefresh_NewEvents = parseInt( new Date().getTime() / 1000 );	// in seconds
+				
+				var xmlhttp;
+				if (window.XMLHttpRequest) {	// code for IE7+, Firefox, Chrome, Opera, Safari
+					xmlhttp=new XMLHttpRequest();
+				} else {						// code for IE6, IE5
+					xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+				}
+				
+				xmlhttp.onreadystatechange = function() {
+			  		if (xmlhttp.readyState==4 && xmlhttp.status==200) {	// when loaded:
+						eval( xmlhttp.responseText );
+				 	}
+				}
+				
+				xmlhttp.open("GET","Ajax/RefreshLogin/CheckForNews.php?SID=lngg6f8lgr22o2cftgk0fjtvu1", true);
+				xmlhttp.send();		// load the php-page
+			}
+
+			setTimeout('RefreshNewEvents()', 5000);   	// call function again in 5 seconds
+		}
+		
+		
+		try {
+			NewsAlertObject = new Audio("");			// starts to load sound file when page is loaded
+			ChatAlertObject = new Audio("");			// starts to load sound file when page is loaded
+			if ( (NewsAlertObject.canPlayType("audio/wav")!='no') && (NewsAlertObject.canPlayType("audio/wav")!='') ) {
+				NewsAlertObject = new Audio("NewsAlert.wav"); 		// check if WAVE is suppoerted
+				ChatAlertObject = new Audio("http://chat.rpgorg.net/bird.wav"); 		// check if WAVE is suppoerted
+			} else if ( (NewsAlertObject.canPlayType("audio/mp3")!='no') && (NewsAlertObject.canPlayType("audio/mp3")!='') ) {
+				NewsAlertObject = new Audio("NewsAlert.mp3"); 		// check if MP3 is suppoerted
+				ChatAlertObject = new Audio("http://chat.rpgorg.net/bird.mp3"); 		// check if MP3 is suppoerted
+			} else if ( (NewsAlertObject.canPlayType("audio/ogg")!='no') && (NewsAlertObject.canPlayType("audio/ogg")!='') ) {
+				NewsAlertObject = new Audio("NewsAlert.ogg"); 		// check if OGG is suppoerted
+				ChatAlertObject = new Audio("http://chat.rpgorg.net/bird.ogg"); 		// check if OGG is suppoerted
+			}
+		} catch (e) { }
+		function PlayNewsAlert () {
+			try {	// try method 1	
+				NewsAlertObject.play();
+			} catch (e) {
+			}
+		}
+		function PlayChatAlert () {
+			try {	// try method 1	
+				ChatAlertObject.play();
+			} catch (e) {
+			}
+		}
+	
+		var step_ShowNewsInTitle = 1;
+		var timer_ShowNewsInTitle;
+		function ShowNewsInTitle() {
+			clearTimeout(timer_ShowNewsInTitle);	// makes sure only that there are not two overlapping executions
+			if (focused == false) {		// show animation only if window is not focused
+				switch (step_ShowNewsInTitle) {
+					case 1: document.title = "NEUIGKEITEN"; 
+							break;
+					case 2: document.title = "rpgOrg";
+							step_ShowNewsInTitle = 0;
+							break;				   
+				}
+				step_ShowNewsInTitle++;
+				timer_ShowNewsInTitle = setTimeout("ShowNewsInTitle()", 1250);
+			} else {
+				document.title = "rpgOrg";
+			}
+		}
+		
+		// Function to check weather tab has the focus. Variable "focused" will contain the information if currently focused or not
+		var focused = true;
+		function onBlur() {
+			focused = false;
+		};
+		function onFocus(){
+			focused = true;
+		};
+		if (/*@cc_on!@*/false) { 		// Internet Explorer
+			document.onfocusin = onFocus;
+			document.onfocusout = onBlur;
+		} else {									// Firefox
+			window.onfocus = onFocus;
+			window.onblur = onBlur;
+		}		
+		
+		
+		
+		function HideAllttt() {
+			try {
+				ttt_objects = document.getElementsByClassName("My_ttt");
+				for(i=0; i<ttt_objects.length; i++) {  
+					ttt_objects[i].style.display = "none";  
+				} 
+			} catch (e) { }
+		}
+
+
+
+
+
+	(
+		function(window, document, undefined) {
+			var My_ttt = function( element, Config_, ttt_object) {
+				var config = {
+					id: Config_.id|| undefined,
+					className: Config_.className || undefined,
+					text: Config_.text || undefined
+				};
+				var over_event = function(event) {
+					ttt_object.style.display = "block";
+				},
+				out_event = function(event) {
+					ttt_object.style.display = "none";
+				},
+				move_event = function(event) {
+					event = event ? event : window.event;
+					if ( event.pageX == null && event.clientX != null ) {
+						event.pageX = event.clientX + (document.documentElement && document.documentElement.scrollLeft || document.body && document.body.scrollLeft || 0) - (document.documentElement && document.documentElement.clientLeft || document.body && document.body.clientLeft || 0);
+						event.pageY = event.clientY + (document.documentElement && document.documentElement.scrollTop  || document.body && document.body.scrollTop  || 0) - (document.documentElement && document.documentElement.clientTop  || document.body && document.body.clientTop  || 0);
+					}
+					
+					//Set Y Position of ttt-DIV
+					if (event.pageY-window.pageYOffset > 0.66*window.innerHeight) {
+						ttt_object.style.top = (event.pageY-ttt_object.offsetHeight-8) + "px";
+					} else {
+						ttt_object.style.top = (event.pageY+20) + "px";
+					}
+					//Set Y Position of ttt-DIV
+					if (event.pageX-window.pageXOffset > 0.66*window.innerWidth) {
+						ttt_object.style.left = (event.pageX-ttt_object.offsetWidth-8) + "px";
+					} else {
+						ttt_object.style.left = (event.pageX+20) + "px";
+					}
+				}
+				if (ttt_object === undefined && config.id) {
+					ttt_object = document.getElementById(config.id);
+					if (ttt_object) ttt_object = ttt_object.parentNode.removeChild(ttt_object)
+				}
+				if (ttt_object === undefined && config.text) {
+					ttt_object = document.createElement("div");
+					if (config.id) ttt_object.id= config.id;
+					ttt_object.innerHTML = config.text;
+				}
+				if (config.className) ttt_object.className = config.className;
+				ttt_object = document.body.appendChild(ttt_object);
+				ttt_object.style.position = "absolute";
+				// define functions that are called on mouse events
+				element.onmouseover = over_event;
+				element.onmouseout = out_event;
+				element.onmousemove = move_event;
+				over_event();
+			};
+			window.My_ttt = window.XBT = My_ttt;
+		}
+	)
+	
+	(
+		this, this.document
+	);
+
+	</script>
+
+		<center>
+
+			<noscript>	
+				<div style='color:red; background-color:black'>
+					<br>
+					<b>Bei deinem Browser ist JavaScript deaktiviert! <br>
+					Bitte aktiviere es, um diese Website in vollem Umfang nutzen zu können.</b>
+					<br><br>
+				</div>
+			</noscript>
+
+
+			<table border="0" cellspacing="0" cellpadding="0" height="159" style="width:500px; table-layout:fixed;">
+				<tr>
+					<td width="240" height="159" style="text-align:right; background-image:url(images/bg/rolle/bg_obenl.gif)" valign="bottom">
+					</td>
+					<td width="640" style="background-image:url(images/bg/rolle/bg_obenm.gif)"> 
+						<table border="0" cellspacing="0" cellpadding="0">
+							<tr width="640"> 
+								<td rowspan='2' width='170' style='text-align:center;'> <a class="WhiteRedHover" href="index.php?section=Home"><img src='images/bg/rolle/orkkopf.gif' alt=''/></a> </td>
+								<td width="405" height="90"> <img src='images/bg/rolle/titel.gif' alt='rpgOrg - Dein RPG-Organizer'/> </td>
+								<td width='65'><br><form method='post' name='set_language_form'>
+																<input type="hidden" name='set_language'/>
+																<input type='hidden' name='token' value='8966dc63e0f78c44d34011fb09f1c5f6'>
+																<input type="image" src="images/sonst/flag_de_de.gif" onclick='document.set_language_form.set_language.value="de"; document.set_language_form.submit();'/>  <br>
+																<input type="image" src="images/sonst/flag_en_de.gif" onclick='document.set_language_form.set_language.value="en"; document.set_language_form.submit();'/>
+															</form>
+								</td>
+							</tr>
+							<tr> 
+								<td colspan='2'>
+									
+<div align="right"> 
+
+
+
+	<DIV style='display: inline'><a href='index.php?section=VeranstAll&Year=2014&Month=1&Day=24'><img src='images/menu/veranst.gif' style='border: 0px' alt='Events'></a></DIV>
+				&nbsp;&nbsp; 
+				<DIV style='display: inline'><a href='index.php?section=RankingOverview'><img src='images/menu/ranking.gif' style='border: 0px' alt='Ranking'></a></DIV> 
+				&nbsp; &nbsp; 
+				<DIV style='display:inline'><a href='index.php?section=Foren'><img id='menuForen' src='images/menu/foren.gif' style='border:0px' alt='Foren'></a></DIV> 
+				&nbsp; &nbsp; 
+				<DIV style='display: inline'><a href='index.php?section=Login'><img src='images/menu/login.gif' style='border: 0px' alt='Login'></a></DIV>
+				&nbsp; &nbsp; 
+				<br>
+				<img src='images/Login/Finger_right.gif' align='top'>&nbsp;&nbsp;<i><a class='DarkRedWithHover' href='index.php?section=tour_1'><Font size='+1'>Was ist rpgOrg? Schau dir unsere Tour an.</Font></a></i>&nbsp; &nbsp; 
+</div>
+
+
+<div id="NewBarkerDiv"  style="line-height: 160%; display: none; position: absolute; border: 0px black solid; width:28px; height:25px; background-image: url(images/menu/sprechbl.gif); text-align:center;" onmouseover="XBT(this, {id:'ttt_NewBarker'})"> </div>
+<div id="NewForenDiv"  style="line-height: 160%; display: none; position: absolute; border: 0px black solid; width:28px; height:25px; background-image: url(images/menu/sprechbl.gif); text-align:center;" onmouseover="XBT(this, {id:'ttt_NewForen'})"> </div>
+
+<div id="ttt_NewBarker" class="My_ttt" style="padding: 10px; max-width: 400px; border:1px solid #000000; background-image: url(images/ttt/ttt_bg.jpg)">
+	Neuigkeiten auf dem Marktplatz.
+</div>
+<div id="ttt_NewForen" class="My_ttt" style="padding: 10px; max-width: 400px; border:1px solid #000000; background-image: url(images/ttt/ttt_bg.jpg)">
+	Neuigkeiten in den Foren.
+</div>								</td>
+							</tr>
+						</table>
+					</td>
+					<td width="96" style="background-image:url(images/bg/rolle/bg_obenr.gif)"></td>
+				</tr>
+				<tr>
+					<td width="200" valign=top style="height:450px; padding:20px;"> <br><br><br><br><br><img src="images/bg_left/wuerfel_5.gif" style="border: 0px" alt=""> </td>
+					<td width="600" valign=top style="padding:20px; overflow:hidden; background-image:url(images/bg/rolle/bg_mitte.jpg)"> 
+						
+
+<table border='0'>
+	<tr>
+		<td width='100%'><FONT SIZE=+2> <img src="images/Buchstab/V.gif" alt="V" align="top"/>eranstaltungen*</FONT> </td>
+		<td>				<input type="button" value="Neue Veranstaltung eintragen" onclick='window.location="index.php?section=VeranstNew";'>   </td>	
+	</tr>
+</table>
+
+<br><br>
+
+<div style='display:block; padding:5px;'> 
+	<div id='Reiter_1' style='display:inline; padding:5px; cursor:pointer; border:1px solid #000000; background-image: url(images/ttt/ttt_bg.jpg)'>Alle</div>
+	<div id='Reiter_2' style='display:inline; padding:5px; cursor:pointer; border:1px solid #000000; background-image: url(images/bg/bg_dunkl.gif)' onclick='window.location="index.php?section=VeranstMy"'>Meine</div>
+	<div id='Reiter_3' style='display:inline; padding:5px; cursor:pointer; border:1px solid #000000; background-image: url(images/bg/bg_dunkl.gif)' onclick='window.location="index.php?section=VeranstFriends"'>Von Weggefährten</div>
+</div>
+<div style='display:block; padding:10px; border:1px black solid; background-image: url(images/bg/bg_med.gif_)'> 
+		<table border='0'>
+			<tr>
+				<td valign='top'>
+					<table cellpadding='0' cellspacing='2' border="0" style='background-Image:url(images/bg/bg_med.gif)'>
+						<tr height='25' style='background-Image:url(images/bg/bg_med.gif)'>
+							<td style='text-align:left'><a href="index.php?section=VeranstAll&Year=2013&Month=12&Day=1"><img src="images/Veranst/pfeil_l.gif"></a></td>	
+							<td colspan="5" style='text-align:center;background-Image:url(images/bg/bg_dunkl.gif)'><i>Januar 2014</i></td> 
+							<td style='text-align:right'><a href="index.php?section=VeranstAll&Year=2014&Month=2&Day=1"><img src="images/Veranst/pfeil_r.gif"></a></td>	
+						</tr><tr height='25' style='background-Image:url(images/ttt/ttt_bg.jpg)'>	
+							<td width="25" style='text-align:center'>Mo</td> 
+							<td width="25" style='text-align:center'>Di</td> 
+							<td width="25" style='text-align:center'>Mi</td> 
+							<td width="25" style='text-align:center'>Do</td> 
+							<td width="25" style='text-align:center'>Fr</td> 
+							<td width="25" style='text-align:center'>Sa</td> 
+							<td width="25" style='text-align:center'>So</td>
+						</tr><tr height='25'>	
+			<td style='text-align:center; background-Image:url(images/bg/bg_dunkl.gif)'><a href='index.php?section=VeranstAll&Year=2013&Month=12&Day=30' style='display:block' width='100%' height='100%'><font color='grey'>30</font></a></td><td style='text-align:center; background-Image:url(images/bg/bg_dunkl.gif)'><a href='index.php?section=VeranstAll&Year=2013&Month=12&Day=31' style='display:block' width='100%' height='100%'><font color='grey'>31</font></a></td><td style='text-align:center; background-Image:url(images/bg/bg_dunkl.gif)'><a href='index.php?section=VeranstAll&Year=2014&Month=1&Day=1' style='display:block' width='100%' height='100%'>1</a></td><td style='text-align:center; background-Image:url(images/bg/bg_dunkl.gif)'><a href='index.php?section=VeranstAll&Year=2014&Month=1&Day=2' style='display:block' width='100%' height='100%'>2</a></td><td style='text-align:center; background-Image:url(images/bg/bg_dunkl.gif)'><a href='index.php?section=VeranstAll&Year=2014&Month=1&Day=3' style='display:block' width='100%' height='100%'>3</a></td><td style='text-align:center; background-Image:url(images/bg/bg_dunkl.gif)'><a href='index.php?section=VeranstAll&Year=2014&Month=1&Day=4' style='display:block' width='100%' height='100%'>4</a></td><td style='text-align:center; background-Image:url(images/bg/bg_dunkl.gif)'><a href='index.php?section=VeranstAll&Year=2014&Month=1&Day=5' style='display:block' width='100%' height='100%'>5</a></td></tr><tr height='25'><td style='text-align:center; background-Image:url(images/bg/bg_dunkl.gif)'><a href='index.php?section=VeranstAll&Year=2014&Month=1&Day=6' style='display:block' width='100%' height='100%'>6</a></td><td style='text-align:center; background-Image:url(images/bg/bg_dunkl.gif)'><a href='index.php?section=VeranstAll&Year=2014&Month=1&Day=7' style='display:block' width='100%' height='100%'>7</a></td><td style='text-align:center; background-Image:url(images/bg/bg_dunkl.gif)'><a href='index.php?section=VeranstAll&Year=2014&Month=1&Day=8' style='display:block' width='100%' height='100%'>8</a></td><td style='text-align:center; background-Image:url(images/bg/bg_dunkl.gif)'><a href='index.php?section=VeranstAll&Year=2014&Month=1&Day=9' style='display:block' width='100%' height='100%'>9</a></td><td style='text-align:center; background-Image:url(images/bg/bg_dunkl.gif)'><a href='index.php?section=VeranstAll&Year=2014&Month=1&Day=10' style='display:block' width='100%' height='100%'>10</a></td><td style='text-align:center; background-Image:url(images/bg/bg_dunkl.gif)'><a href='index.php?section=VeranstAll&Year=2014&Month=1&Day=11' style='display:block' width='100%' height='100%'>11</a></td><td style='text-align:center; background-Image:url(images/bg/bg_dunkl.gif)'><a href='index.php?section=VeranstAll&Year=2014&Month=1&Day=12' style='display:block' width='100%' height='100%'>12</a></td></tr><tr height='25'><td style='text-align:center; background-Image:url(images/bg/bg_dunkl.gif)'><a href='index.php?section=VeranstAll&Year=2014&Month=1&Day=13' style='display:block' width='100%' height='100%'>13</a></td><td style='text-align:center; background-Image:url(images/bg/bg_dunkl.gif)'><a href='index.php?section=VeranstAll&Year=2014&Month=1&Day=14' style='display:block' width='100%' height='100%'>14</a></td><td style='text-align:center; background-Image:url(images/bg/bg_dunkl.gif)'><a href='index.php?section=VeranstAll&Year=2014&Month=1&Day=15' style='display:block' width='100%' height='100%'>15</a></td><td style='text-align:center; background-Image:url(images/bg/bg_dunkl.gif)'><a href='index.php?section=VeranstAll&Year=2014&Month=1&Day=16' style='display:block' width='100%' height='100%'>16</a></td><td style='text-align:center; background-Image:url(images/bg/bg_dunkl.gif)'><a href='index.php?section=VeranstAll&Year=2014&Month=1&Day=17' style='display:block' width='100%' height='100%'>17</a></td><td style='text-align:center; background-Image:url(images/bg/bg_dunkl.gif)'><a href='index.php?section=VeranstAll&Year=2014&Month=1&Day=18' style='display:block' width='100%' height='100%'>18</a></td><td style='text-align:center; background-Image:url(images/bg/bg_dunkl.gif)'><a href='index.php?section=VeranstAll&Year=2014&Month=1&Day=19' style='display:block' width='100%' height='100%'>19</a></td></tr><tr height='25'><td style='text-align:center; background-Image:url(images/bg/bg_dunkl.gif)'><a href='index.php?section=VeranstAll&Year=2014&Month=1&Day=20' style='display:block' width='100%' height='100%'>20</a></td><td style='text-align:center; background-Image:url(images/bg/bg_dunkl.gif)'><a href='index.php?section=VeranstAll&Year=2014&Month=1&Day=21' style='display:block' width='100%' height='100%'>21</a></td><td style='text-align:center; background-Image:url(images/bg/bg_dunkl.gif)'><a href='index.php?section=VeranstAll&Year=2014&Month=1&Day=22' style='display:block' width='100%' height='100%'>22</a></td><td style='text-align:center; background-Image:url(images/bg/bg_dunkl2.gif)'><a href='index.php?section=VeranstAll&Year=2014&Month=1&Day=23' style='display:block' width='100%' height='100%'>23</a></td><td style='text-align:center; background-Image:url(images/bg/bg_dunkl.gif)'><a href='index.php?section=VeranstAll&Year=2014&Month=1&Day=24' style='display:block' width='100%' height='100%'>24</a></td><td style='text-align:center; background-Image:url(images/bg/bg_dunkl.gif)'><a href='index.php?section=VeranstAll&Year=2014&Month=1&Day=25' style='display:block' width='100%' height='100%'>25</a></td><td style='text-align:center; background-Image:url(images/bg/bg_dunkl.gif)'><a href='index.php?section=VeranstAll&Year=2014&Month=1&Day=26' style='display:block' width='100%' height='100%'>26</a></td></tr><tr height='25'><td style='text-align:center; background-Image:url(images/bg/bg_dunkl.gif)'><a href='index.php?section=VeranstAll&Year=2014&Month=1&Day=27' style='display:block' width='100%' height='100%'>27</a></td><td style='text-align:center; background-Image:url(images/bg/bg_dunkl.gif)'><a href='index.php?section=VeranstAll&Year=2014&Month=1&Day=28' style='display:block' width='100%' height='100%'>28</a></td><td style='text-align:center; background-Image:url(images/bg/bg_dunkl.gif)'><a href='index.php?section=VeranstAll&Year=2014&Month=1&Day=29' style='display:block' width='100%' height='100%'>29</a></td><td style='text-align:center; background-Image:url(images/bg/bg_dunkl.gif)'><a href='index.php?section=VeranstAll&Year=2014&Month=1&Day=30' style='display:block' width='100%' height='100%'>30</a></td><td style='text-align:center; background-Image:url(images/bg/bg_dunkl.gif)'><a href='index.php?section=VeranstAll&Year=2014&Month=1&Day=31' style='display:block' width='100%' height='100%'>31</a></td><td style='text-align:center; background-Image:url(images/bg/bg_dunkl.gif)'><a href='index.php?section=VeranstAll&Year=2014&Month=2&Day=1' style='display:block' width='100%' height='100%'><font color='grey'>1</font></a></td><td style='text-align:center; background-Image:url(images/bg/bg_dunkl.gif)'><a href='index.php?section=VeranstAll&Year=2014&Month=2&Day=2' style='display:block' width='100%' height='100%'><font color='grey'>2</font></a></td>						</tr>		
+					</table>				
+				</td><td width='40'>
+				</td><td style="vertical-align:top">
+					<form method="POST">
+						<table border="0">
+							<tr>
+								<td colspan="2"><b>Filter</b></td>
+							</tr><tr height="6px">
+							</tr><tr>
+								<td>Name </td> <td><input type="text" name="Filter_Name" maxlength="40" value=""></td>
+							</tr><tr>
+								<td>Typ </td> <td> 	<SELECT NAME='Filter_Typ' ID='Filter_Typ' onchange='Typ_Selected()'>
+														<OPTION VALUE=-1 SELECTED> </OPTION>
+														<OPTION VALUE=0  >Rollenspiel (Pen & Paper)</OPTION>
+														<OPTION VALUE=10 >MMORPG</OPTION>
+														<OPTION VALUE=20 >LARP</OPTION>
+														<OPTION VALUE=30 >Kartenspiel</OPTION>
+														<OPTION VALUE=40 >Trading Card Game</OPTION>
+														<OPTION VALUE=50 >PC-Spiel</OPTION>
+														<OPTION VALUE=60 >Brettspiel</OPTION>
+														<OPTION VALUE=70 >Tabletop</OPTION>
+														<OPTION VALUE=80 >Konsolenspiel</OPTION>
+														<OPTION VALUE=90 >Mittelaltermarkt</OPTION>
+														<OPTION VALUE=95 >Convention</OPTION>
+														<OPTION VALUE=100 >Sonstiges</OPTION>
+													</SELECT>	</td>
+							</tr><tr id='Filter_RPG_tabelRow'>
+								<td>System </td> <td>  		<SELECT NAME=Filter_RPG_ID_PP ID=Filter_RPG_ID_PP>
+																				<OPTION VALUE='-1'></OPTION><OPTION VALUE=0>--- kein System ---</OPTION><OPTION VALUE=10>Sonstiges (Pen and Paper)</OPTION><optgroup label="Fantasy"><OPTION VALUE=800>7te See</OPTION><OPTION VALUE=900>Arcane Codex</OPTION><OPTION VALUE=1000>Ars Magica</OPTION><OPTION VALUE=1100>Chivalry Sorcery</OPTION><OPTION VALUE=1200>Chainmail</OPTION><OPTION VALUE=1300>Das Schwarze Auge (DSA)</OPTION><OPTION VALUE=1400>Der Herr der Ringe</OPTION><OPTION VALUE=1500>Adv. Dungeons & Dragons</OPTION><OPTION VALUE=1600>Dungeons & Dragons 3.0/3.5</OPTION><OPTION VALUE=1700>Dungeons & Dragons 4.0</OPTION><OPTION VALUE=1750>Dungeonslayers</OPTION><OPTION VALUE=1800>Earthdawn</OPTION><OPTION VALUE=1900>Everway</OPTION><OPTION VALUE=2000>Exalted</OPTION><OPTION VALUE=2050>Finsterland</OPTION><OPTION VALUE=2085>HârnMaster</OPTION><OPTION VALUE=2100>HeroQuest</OPTION><OPTION VALUE=2150>Kobolde!</OPTION><OPTION VALUE=2200>Legend of the Five Rings</OPTION><OPTION VALUE=2300>Midgard</OPTION><OPTION VALUE=2400>Mittelerde-Rollenspiel (MERS)</OPTION><OPTION VALUE=2500>Meister der Magie</OPTION><OPTION VALUE=2560>Plüsch, Power & Plunder</OPTION><OPTION VALUE=2600>Rolemaster</OPTION><OPTION VALUE=2700>Ruf des Warlock </OPTION><OPTION VALUE=2800>RuneQuest</OPTION><OPTION VALUE=2825>Savage Worlds</OPTION><OPTION VALUE=2850>Seelenfänger</OPTION><OPTION VALUE=2875>Skyrealms of Jorune</OPTION><OPTION VALUE=2900>Sorcerer</OPTION><OPTION VALUE=3000>Sturmbringer</OPTION><OPTION VALUE=3050>Talislanta</OPTION><OPTION VALUE=3100>Warhammer-Fantasy-RPG</OPTION></optgroup> <optgroup label="Mystery & Horror"><OPTION VALUE=20100>All Flesh Must Be Eaten</OPTION><OPTION VALUE=20200>Call of Cthulhu</OPTION><OPTION VALUE=20280>Changeling</OPTION><OPTION VALUE=20300>Chill</OPTION><OPTION VALUE=20400>Deadlands</OPTION><OPTION VALUE=20500>Kult</OPTION><OPTION VALUE=20600>Over the Edge</OPTION><OPTION VALUE=20700>Unknown Armies</OPTION><OPTION VALUE=20800>Hunter</OPTION><OPTION VALUE=20900>Mage</OPTION><OPTION VALUE=21000>Vampire: The Masquerade</OPTION><OPTION VALUE=21005>Vampire: The Dark Ages</OPTION><OPTION VALUE=21100>Werewolf</OPTION><OPTION VALUE=21200>Wraith</OPTION></optgroup> <optgroup label="Zukunft"><OPTION VALUE=40100>Aliens</OPTION><OPTION VALUE=40200>Babylon 5</OPTION><OPTION VALUE=40300>Bubblegum Crisis</OPTION><OPTION VALUE=40350>Chat- und Forensysteme</OPTION><OPTION VALUE=40400>Cyberpunk 2020</OPTION><OPTION VALUE=40500>Degenesis</OPTION><OPTION VALUE=40600>Engel</OPTION><OPTION VALUE=40700>Ex Machina</OPTION><OPTION VALUE=40800>Fading Suns</OPTION><OPTION VALUE=40900>Heavy Gear</OPTION><OPTION VALUE=41000>Heredium</OPTION><OPTION VALUE=41100>LodlanD</OPTION><OPTION VALUE=41200>MechWarrior</OPTION><OPTION VALUE=41260>Paranoia</OPTION><OPTION VALUE=41300>Perry-Rhodan-Rollenspiel</OPTION><OPTION VALUE=41400>RiftRoamers</OPTION><OPTION VALUE=41420>Rifts</OPTION><OPTION VALUE=41500>Shadowrun</OPTION><OPTION VALUE=41600>SLA Industries</OPTION><OPTION VALUE=41700>Space Gothic</OPTION><OPTION VALUE=41800>Space Master</OPTION><OPTION VALUE=41897>Star Wars (D6)</OPTION><OPTION VALUE=41900>Star Wars (D20)</OPTION><OPTION VALUE=42000>Traveller</OPTION><OPTION VALUE=42500>Warhammer 40,000</OPTION></optgroup> <optgroup label="Superhelden"><OPTION VALUE=60100>Champions</OPTION><OPTION VALUE=60150>Marvel Super Heroes</OPTION><OPTION VALUE=60200>Mutants & Masterminds</OPTION></optgroup> </SELECT>  
+																				<SELECT NAME=Filter_RPG_ID_MMO ID=Filter_RPG_ID_MMO>
+																					<OPTION VALUE='-1'></OPTION><OPTION VALUE=80010>Sonstiges (MMORPG)</OPTION><OPTION VALUE=80100>4th Coming, The </OPTION><OPTION VALUE=80200>Ace Online</OPTION><OPTION VALUE=80300>Aces High </OPTION><OPTION VALUE=80400>AdventureQuest Worlds</OPTION><OPTION VALUE=80500>Age of Conan</OPTION><OPTION VALUE=80600>AIKA Online</OPTION><OPTION VALUE=80700>Aion</OPTION><OPTION VALUE=80800>Alganon</OPTION><OPTION VALUE=80900>Anarchy Online</OPTION><OPTION VALUE=81000>Angel Love Online</OPTION><OPTION VALUE=81100>ArchLord</OPTION><OPTION VALUE=81200>Asda Story</OPTION><OPTION VALUE=81300>Asheron's Call</OPTION><OPTION VALUE=81400>Asheron's Call 2</OPTION><OPTION VALUE=81500>Atlantica Online </OPTION><OPTION VALUE=81600>Black Prophecy</OPTION><OPTION VALUE=81700>Blood Wars</OPTION><OPTION VALUE=81800>Cabal Online</OPTION><OPTION VALUE=81900>Cartoon Network Universe: FusionFall</OPTION><OPTION VALUE=82000>Castle of Heroes</OPTION><OPTION VALUE=82100>Champions Online</OPTION><OPTION VALUE=82200>Chronicles of Spellborn, The</OPTION><OPTION VALUE=82300>City of Heroes</OPTION><OPTION VALUE=82400>City of Villains</OPTION><OPTION VALUE=82500>Clan Lord</OPTION><OPTION VALUE=82600>Club Penguin</OPTION><OPTION VALUE=82700>Crowns of Power</OPTION><OPTION VALUE=82800>Dark Age of Camelot</OPTION><OPTION VALUE=82900>Dark Ages</OPTION><OPTION VALUE=83000>Dark and Light</OPTION><OPTION VALUE=83100>Dark Sun Online</OPTION><OPTION VALUE=83200>Darkeden</OPTION><OPTION VALUE=83300>Darkfall</OPTION><OPTION VALUE=83400>Dawntide</OPTION><OPTION VALUE=83500>DC Universe Online</OPTION><OPTION VALUE=83600>DECO Online</OPTION><OPTION VALUE=83700>Doctor Who: Worlds in Time</OPTION><OPTION VALUE=83800>Dofus</OPTION><OPTION VALUE=83900>Dragon Ball Online</OPTION><OPTION VALUE=84000>Dragon Nest</OPTION><OPTION VALUE=84100>Dragon Oath</OPTION><OPTION VALUE=84200>Dragon Quest X</OPTION><OPTION VALUE=84300>DragonRealms</OPTION><OPTION VALUE=84400>Dragonica</OPTION><OPTION VALUE=84500>Drakensang Online</OPTION><OPTION VALUE=84600>Dreamlords</OPTION><OPTION VALUE=84700>Dungeons & Dragons Online</OPTION><OPTION VALUE=84800>Dynasty Warriors Online</OPTION><OPTION VALUE=84900>Earthrise</OPTION><OPTION VALUE=85000>Emil Chronicle Online</OPTION><OPTION VALUE=85100>Empire & State</OPTION><OPTION VALUE=85200>Entropia Universe</OPTION><OPTION VALUE=85300>Eve Online</OPTION><OPTION VALUE=85400>EverQuest</OPTION><OPTION VALUE=85500>EverQuest II</OPTION><OPTION VALUE=85600>Face of Mankind</OPTION><OPTION VALUE=85700>Fallen Earth</OPTION><OPTION VALUE=85800>Fantage</OPTION><OPTION VALUE=85900>Free Realms</OPTION><OPTION VALUE=86000>Fiesta Online</OPTION><OPTION VALUE=86100>Final Fantasy XI</OPTION><OPTION VALUE=86200>Final Fantasy XIV</OPTION><OPTION VALUE=86300>Flyff</OPTION><OPTION VALUE=86400>Furcadia</OPTION><OPTION VALUE=86500>Gemstone IV</OPTION><OPTION VALUE=86600>Gods & Heroes: Rome Rising</OPTION><OPTION VALUE=86700>GodsWar Online</OPTION><OPTION VALUE=86800>Granado Espada</OPTION><OPTION VALUE=86900>Guild Wars</OPTION><OPTION VALUE=87000>Guild Wars 2</OPTION><OPTION VALUE=87100>Helbreath</OPTION><OPTION VALUE=87200>Hello Kitty Online</OPTION><OPTION VALUE=87300>Hero Online</OPTION><OPTION VALUE=87400>Illyriad</OPTION><OPTION VALUE=87500>Istaria: Chronicles of the Gifted</OPTION><OPTION VALUE=87600>Jumpgate</OPTION><OPTION VALUE=87700>King of Kings 3</OPTION><OPTION VALUE=87800>Kingdom of Loathing</OPTION><OPTION VALUE=87900>Knight Online</OPTION><OPTION VALUE=88000>LaTale</OPTION><OPTION VALUE=88100>Legend of Mir 2, The</OPTION><OPTION VALUE=88200>Legend of Mir 3, The</OPTION><OPTION VALUE=88300>Lineage</OPTION><OPTION VALUE=88400>Lineage II</OPTION><OPTION VALUE=88500>Lineage III</OPTION><OPTION VALUE=88600>Little Space Heroes</OPTION><OPTION VALUE=88700>Lord of the Rings Online, The</OPTION><OPTION VALUE=88800>Love</OPTION><OPTION VALUE=88900>Mabinogi</OPTION><OPTION VALUE=89000>MapleStory</OPTION><OPTION VALUE=89100>Meridian 59</OPTION><OPTION VALUE=89200>Metin 2</OPTION><OPTION VALUE=89300>Minions of Mirth</OPTION><OPTION VALUE=89400>Monato Esprit</OPTION><OPTION VALUE=89500>Mortal Online</OPTION><OPTION VALUE=89600>MU Online</OPTION><OPTION VALUE=89700>Myst Online</OPTION><OPTION VALUE=89800>Myth War Online</OPTION><OPTION VALUE=89900>Neocron</OPTION><OPTION VALUE=90000>Neocron 2</OPTION><OPTION VALUE=90100>Neverwinter Nights</OPTION><OPTION VALUE=90200>Nexus</OPTION><OPTION VALUE=90300>Parallel Kingdom</OPTION><OPTION VALUE=90400>Pardus</OPTION><OPTION VALUE=90500>Perfect World</OPTION><OPTION VALUE=90600>Perpetuum</OPTION><OPTION VALUE=90700>Phantasy Star Universe</OPTION><OPTION VALUE=90800>Planetarion</OPTION><OPTION VALUE=90900>Poptropica</OPTION><OPTION VALUE=91000>Pirates of the Burning Sea</OPTION><OPTION VALUE=91100>Pirates of the Caribbean Online</OPTION><OPTION VALUE=91200>Priston Tale</OPTION><OPTION VALUE=91300>Priston Tale 2</OPTION><OPTION VALUE=91400>Puppet Guardian</OPTION><OPTION VALUE=91500>Puzzle Pirates</OPTION><OPTION VALUE=91600>Ragnarok Online</OPTION><OPTION VALUE=91700>Ragnarok Online 2</OPTION><OPTION VALUE=91800>Ran Online</OPTION><OPTION VALUE=91900>Realm of the Mad God</OPTION><OPTION VALUE=92000>Realm Online, The</OPTION><OPTION VALUE=92100>Regnum Online</OPTION><OPTION VALUE=92200>Requiem: Memento Mori</OPTION><OPTION VALUE=92300>RF Online</OPTION><OPTION VALUE=92400>Rift</OPTION><OPTION VALUE=92500>Roblox</OPTION><OPTION VALUE=92600>Rohan: Blood Feud</OPTION><OPTION VALUE=92700>Roma Victor</OPTION><OPTION VALUE=92800>ROSE Online</OPTION><OPTION VALUE=92900>Rubies of Eventide</OPTION><OPTION VALUE=93000>Runes of Magic</OPTION><OPTION VALUE=93100>RuneScape </OPTION><OPTION VALUE=93200>Rusty Hearts </OPTION><OPTION VALUE=93300>Ryzom </OPTION><OPTION VALUE=93400>Sangokushi Online </OPTION><OPTION VALUE=93500>Seal Online </OPTION><OPTION VALUE=93600>Secret World, The</OPTION><OPTION VALUE=93700>Sentou Gakuen </OPTION><OPTION VALUE=93800>Shin Megami Tensei: Imagine </OPTION><OPTION VALUE=93900>Silkroad Online</OPTION><OPTION VALUE=94000>Sho Online </OPTION><OPTION VALUE=94100>Shot-Online</OPTION><OPTION VALUE=94200>Survival Project </OPTION><OPTION VALUE=94300>Soul of the Ultimate Nation </OPTION><OPTION VALUE=94400>Spiral Knights</OPTION><OPTION VALUE=94500>Star Trek Online</OPTION><OPTION VALUE=94600>Star Wars Galaxies</OPTION><OPTION VALUE=94700>Star Wars: The Old Republic </OPTION><OPTION VALUE=94800>StarQuest Online </OPTION><OPTION VALUE=94900>Tale in the Desert, A</OPTION><OPTION VALUE=95000>Tales of Pirates </OPTION><OPTION VALUE=95100>Tera</OPTION><OPTION VALUE=95200>Tibia</OPTION><OPTION VALUE=95300>Trickster Online</OPTION><OPTION VALUE=95400>Twelve Sky</OPTION><OPTION VALUE=95500>Ultima Online</OPTION><OPTION VALUE=95600>Uncharted Waters Online</OPTION><OPTION VALUE=95700>Urban Dead</OPTION><OPTION VALUE=95800>Vanguard</OPTION><OPTION VALUE=95900>Vendetta Online</OPTION><OPTION VALUE=96000>Vindictus</OPTION><OPTION VALUE=96100>Voyage Century Online</OPTION><OPTION VALUE=96200>Wakfu</OPTION><OPTION VALUE=96300>Warhammer Online</OPTION><OPTION VALUE=96400>With Your Destiny</OPTION><OPTION VALUE=96500>WonderKing Online</OPTION><OPTION VALUE=96600>World of Warcraft</OPTION><OPTION VALUE=96700>Wurm Online</OPTION><OPTION VALUE=96800>Zu Online</OPTION></optgroup> </SELECT>  
+																				<SELECT NAME=Filter_RPG_ID_LARP ID=Filter_RPG_ID_LARP>
+																					<OPTION VALUE='-1'></OPTION><OPTION VALUE=200010>Sonstiges (LARP)</OPTION><OPTION VALUE=200100>Alive</OPTION><OPTION VALUE=200200>Codex II</OPTION><OPTION VALUE=200300>Con-Fusion</OPTION><OPTION VALUE=200400>ConQuest</OPTION><OPTION VALUE=200500>Con-Trolle</OPTION><OPTION VALUE=200600>Daimon</OPTION><OPTION VALUE=200700>Da Rulez</OPTION><OPTION VALUE=200800>De Ludis DSA</OPTION><OPTION VALUE=200900>Dilettanten</OPTION><OPTION VALUE=200975>Drachenfest</OPTION><OPTION VALUE=201000>DragonSys I</OPTION><OPTION VALUE=201100>DragonSys II</OPTION><OPTION VALUE=201200>DSA-Larpregeln</OPTION><OPTION VALUE=201300>DSA-Larpregeln No.2</OPTION><OPTION VALUE=201400>DSA-Larpregeln (nach DSA 4)</OPTION><OPTION VALUE=201500>Eh-te-eh-rar</OPTION><OPTION VALUE=201600>Elrond</OPTION><OPTION VALUE=201700>Giftstaub</OPTION><OPTION VALUE=201800>Glatisant</OPTION><OPTION VALUE=201900>Kobold</OPTION><OPTION VALUE=202000>Leges Ludicri</OPTION><OPTION VALUE=202100>LiveQuest</OPTION><OPTION VALUE=202200>LURPS</OPTION><OPTION VALUE=202300>Mallombrien</OPTION><OPTION VALUE=202400>Millennium</OPTION><OPTION VALUE=202500>Nexus</OPTION><OPTION VALUE=202600>Oh-Kultes</OPTION><OPTION VALUE=202700>Pahia</OPTION><OPTION VALUE=202800>Pax-Vampyrica</OPTION><OPTION VALUE=202900>Phoenix</OPTION><OPTION VALUE=203000>Players</OPTION><OPTION VALUE=203100>Projekt Aeon</OPTION><OPTION VALUE=203200>Real Cyberpunk</OPTION><OPTION VALUE=203300>RuleMaster</OPTION><OPTION VALUE=203400>Sagala</OPTION><OPTION VALUE=203500>Signum online Version</OPTION><OPTION VALUE=203600>Silbermond</OPTION><OPTION VALUE=203700>Starfleet Operations</OPTION><OPTION VALUE=203800>Star Wars Live</OPTION><OPTION VALUE=203900>Tales of Fantasy</OPTION><OPTION VALUE=204000>Tharefas Erben</OPTION><OPTION VALUE=204100>That's Live</OPTION><OPTION VALUE=204200>Twelve Colonies</OPTION><OPTION VALUE=204300>Verdammt in Ewigkeit</OPTION><OPTION VALUE=204400>Vitae</OPTION><OPTION VALUE=204500>Wild West Live</OPTION></optgroup></SELECT>															
+							</tr><tr id="Filter_Spielname">
+								<td>Spielname/Art </td> <td><input type="text" name="Filter_Spielname" maxlength="40" value=""></td>
+							</tr><tr>
+								<td id='td_for_width'>Land </td>
+								<td><SELECT NAME='Filter_Land' ID="SelectedCountry" onchange="include_ajax(600)">
+<OPTION VALUE=0></OPTION><OPTION VALUE=1>Deutschland</OPTION><OPTION VALUE=3>Schweiz</OPTION><OPTION VALUE=2>Österreich</OPTION>									</SELECT>
+								</td>
+							</tr>
+							<tr>
+								<td colspan='2'>
+									<div ID='DependingOnCountry'>
+					
+									</div>
+								</td>
+							</tr>
+							
+						<!--	<tr>
+								<td>Ort </td> <td><input type="text" name="Filter_Ort" maxlength="20" value=""></td>
+							</tr><tr>
+								<td nowrap>Bundesland &nbsp; </td> <td> <select name="Filter_Bundesland">
+															<OPTION VALUE=0>   </OPTION><OPTION VALUE=1>Baden-Württemberg</OPTION><OPTION VALUE=2>Bayern</OPTION><OPTION VALUE=3>Berlin</OPTION><OPTION VALUE=4>Brandenburg</OPTION><OPTION VALUE=5>Bremen</OPTION><OPTION VALUE=6>Hamburg</OPTION><OPTION VALUE=7>Hessen</OPTION><OPTION VALUE=8>Mecklenburg-Vorpommern</OPTION><OPTION VALUE=9>Niedersachsen</OPTION><OPTION VALUE=10>Nordrhein-Westfalen</OPTION><OPTION VALUE=11>Rheinland-Pfalz</OPTION><OPTION VALUE=12>Saarland</OPTION><OPTION VALUE=13>Sachsen</OPTION><OPTION VALUE=14>Sachsen-Anhalt</OPTION><OPTION VALUE=15>Schleswig-Holstein</OPTION><OPTION VALUE=16>Thüringen</OPTION>														</select></td>
+							</tr><tr>
+								<td valign='top'>Umkreis	</td><td> <SELECT NAME='Filter_km'>
+														<OPTION VALUE=0 >   </OPTION>
+														<OPTION VALUE=2   > 2 km  </OPTION>
+														<OPTION VALUE=5   > 5 km  </OPTION>
+														<OPTION VALUE=10  > 10 km  </OPTION>
+														<OPTION VALUE=15  > 15 km  </OPTION>
+														<OPTION VALUE=25  > 25 km  </OPTION>
+														<OPTION VALUE=50  > 50 km  </OPTION>
+														<OPTION VALUE=75  > 75 km  </OPTION>
+														<OPTION VALUE=100 > 100 km </OPTION>
+														<OPTION VALUE=150 > 150 km </OPTION>
+													</SELECT>  um die <br>
+														Postleitzahl <input type="text" name="Filter_PLZ" size ="6" maxlength="6" value=""> </td>
+							</tr>		-->
+							
+							
+							<tr height='6'></tr>
+						</table>
+						<button type="submit" name="Filter_Button_Anwenden" value="clicked">Anwenden</button>	 &nbsp;	
+						<button type="submit" name="Filter_Button_Zurucksetzen" value="clicked">Zurücksetzen</button>
+						<input type='hidden' name='token' value='8966dc63e0f78c44d34011fb09f1c5f6'>
+					</form>
+				</td>			
+			</tr>		
+		</table>		
+
+		<br>
+
+
+
+
+		<table border="0" cellpadding="10" cellspacing="0" width="100%" style='line-height:1.4em;'>
+Es wurden keine Veranstaltungen am 23.1.2014 gefunden, die deinen Filteroptionen entsprechen. Gefundene Veranstaltung an anderen Tagen sind im Kalender fett markiert.<br><br>		</table>
+		<br>
+		
+
+</div>
+
+<br><br>
+* Alle Veranstaltungen, die bei <i>rpgOrg</i> gelistet sind, werden von Nutzern eingetragen. Da es uns nicht möglich ist, die Zuverlässigkeit aller Veranstalter zu prüfen, übernehmen wir keine Gewähr für die Richtigkeit der Einträge.
+
+
+<script type="text/javascript">
+	function Typ_Selected() {		//Hide elements depending on the selected type
+		if (document.getElementById('Filter_Typ').value == -1) {
+			document.getElementById("Filter_RPG_tabelRow").style.display = "none";				
+			document.getElementById("Filter_Spielname").style.display = "none";	
+		} else if (document.getElementById('Filter_Typ').value == 0) {  // RPG selected
+			document.getElementById("Filter_RPG_tabelRow").style.display = "";
+			FadeOpacity ("Filter_RPG_ID_PP", 0.05, 1, 600);
+			document.getElementById("Filter_RPG_ID_PP").style.display = "";				
+			document.getElementById("Filter_RPG_ID_MMO").style.display = "none";				
+			document.getElementById("Filter_RPG_ID_LARP").style.display = "none";				
+			document.getElementById("Filter_Spielname").style.display = "none";				
+		} else if (document.getElementById('Filter_Typ').value == 10) {  // MMORPG selected
+			FadeOpacity ("Filter_RPG_tabelRow", 0.05, 1, 600);
+			document.getElementById("Filter_RPG_ID_PP").style.display = "none";				
+			FadeOpacity ("Filter_RPG_ID_MMO", 0.05, 1, 600);
+			document.getElementById("Filter_RPG_ID_MMO").style.display = "";				
+			document.getElementById("Filter_RPG_ID_LARP").style.display = "none";				
+			document.getElementById("Filter_Spielname").style.display = "none";				
+		} else if (document.getElementById('Filter_Typ').value == 20) {  // LARP selected
+			document.getElementById("Filter_RPG_tabelRow").style.display = "";
+			document.getElementById("Filter_RPG_ID_PP").style.display = "none";				
+			document.getElementById("Filter_RPG_ID_MMO").style.display = "none";
+			FadeOpacity ("Filter_RPG_ID_LARP", 0.05, 1, 600);		
+			document.getElementById("Filter_RPG_ID_LARP").style.display = "";				
+			document.getElementById("Filter_Spielname").style.display = "none";				
+		} else {
+			document.getElementById("Filter_RPG_tabelRow").style.display = "none";				
+			FadeOpacity ("Filter_Spielname", 0.05, 1, 600);
+			document.getElementById("Filter_Spielname").style.display = "";				
+		}
+	}
+	
+	Typ_Selected();
+
+	function include_ajax(MillisForFullFade) {
+		var xmlhttp;
+		if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari
+  			xmlhttp=new XMLHttpRequest();
+  		} else {// code for IE6, IE5
+  			xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+  		}
+		
+		var CountryID = document.getElementById("SelectedCountry").value;
+		var km_initial = 0;		// Set initial value for Postleitzahl. If nothing is entered in the currently shown field, use value from database		
+		try {
+			km_initial = document.getElementById("Filter_km").value;
+		} catch(err) {
+			km_initial = 0;
+		}
+
+		var PLZ_initial = 0;		// Set initial value for Postleitzahl. If nothing is entered in the currently shown field, use value from database		
+		try {
+			PLZ_initial = document.getElementById("Filter_PLZ").value;
+		} catch(err) {
+			PLZ_initial = 0;
+		}
+
+		var Ort_initial = "";		// Set initial value for Ort. If nothing is entered in the currently shown field, use value from database		
+		try {
+			Ort_initial = document.getElementById("Filter_Ort").value;
+		} catch(err) {
+			Ort_initial = "";
+		}
+		
+		var width_td = document.getElementById("td_for_width").offsetWidth - 1;
+
+		var BundeslandID_initial = 0;		// Set initial value for BundeslandID. If nothing is entered in the currently shown field, use value from database		
+		try {
+			BundeslandID_initial = document.getElementById("Filter_Bundesland").value;
+		} catch(err) {
+			BundeslandID_initial = 0;
+		}
+
+		xmlhttp.onreadystatechange = function() {
+			document.getElementById("DependingOnCountry").style.display = 'none';		// hide element if php-page is not jet loaded
+	  		if (xmlhttp.readyState==4 && xmlhttp.status==200) {							// when loaded:
+				document.getElementById("DependingOnCountry").innerHTML=xmlhttp.responseText;
+				FadeOpacity('DependingOnCountry', 0.05, 1, MillisForFullFade);										// Fade the Country depending div in slowly
+				document.getElementById("DependingOnCountry").style.display = '';				// Make sure it is visible
+				HideAllttt();																	// Hide all ttt because there might be old ttt's displayed that can create bugs
+		 	}
+		}		
+		
+		xmlhttp.open("GET","Ajax/VeranstShowAll/PlzOrtBundesl_Selection.php?CountryID="+CountryID+"&SID=lngg6f8lgr22o2cftgk0fjtvu1&km_initial="+km_initial+"&PLZ_initial="+PLZ_initial+"&Ort_initial="+Ort_initial+"&BundeslandID_initial="+BundeslandID_initial+"&width_td="+width_td, true);
+		xmlhttp.send();		// load the php-page
+	}
+	
+	include_ajax(10);
+</script>
+
+
+
+	
+	
+ 
+					</td>
+					<td></td>
+				</tr>
+				<tr valign="top">
+					<td width="240" height="195" valign="top"> &nbsp; </td>
+					<td colspan='2' width="640" valign="top" height="60" style="background-image:url(images/bg/rolle/bg_unten.gif)"> 
+						<table border='0'>
+							<tr height='98'></tr>	
+							<tr>
+								<td width='205'></td>					
+								<td><br>
+
+<div align="right" style='white-space:nowrap;'> <a href="index.php?section=About">Über uns</a> &nbsp; <a href="index.php?section=Contact">Kontakt</a> &nbsp; <a href="index.php?section=VRegeln">Verhaltensregeln</a> &nbsp; <a href="index.php?section=Datenschutz">Datenschutz</a> &nbsp; <a href="index.php?section=AGB">AGB</a> &nbsp; <a href="index.php?section=Impressum">Impressum</a> &nbsp; &nbsp; </div></td>					
+							</tr>			
+						</table>
+						
+					</td>
+				</tr>
+			</table>
+		
+		</center>
+
+
+
+
+
+
+<script language ='JavaScript'>
+
+	function SetPositionHomeNewsDiv() {
+		// Get the divs that I need
+		var Home_div = document.getElementById('menuitem1');
+		var HomeNews_div = document.getElementById('NewsInHome');
+
+		var Obj = Home_div;
+		var Pos_Left = 0;
+		var Pos_Top = 0;
+		while (Obj){
+			Pos_Left += Obj.offsetLeft;
+			Pos_Top += Obj.offsetTop;
+			Obj = Obj.offsetParent;
+		}
+
+		// Set new position of the "NewMessage_div"
+		HomeNews_div.style.top = (Pos_Top-Home_div.offsetHeight*0.4) + 'px';
+		HomeNews_div.style.left = (Pos_Left+Home_div.offsetWidth-HomeNews_div.offsetWidth*0.5) + 'px';
+	}
+	document.getElementById('NewsInHome').innerHTML = "&nbsp; &nbsp;";
+		SetPositionHomeNewsDiv();
+		
+		
+	function SetPositionNewMessageDiv() {
+		// Get the divs that I need
+		var Botend_div = document.getElementById('menuitem7');
+		var NewMessage_div = document.getElementById('NewMessagesDiv');
+
+		var Obj = Botend_div;   //Get position of "Botendienst"-Div
+		var Pos_Left = 0;
+		var Pos_Top = 0;
+		while (Obj){
+			Pos_Left += Obj.offsetLeft;
+			Pos_Top += Obj.offsetTop;
+			Obj = Obj.offsetParent;
+		}
+
+		// Set new position of the "NewMessage_div"
+		NewMessage_div.style.top = (Pos_Top-NewMessage_div.offsetHeight*0.4) + 'px';
+		NewMessage_div.style.left = (Pos_Left+Botend_div.offsetWidth-NewMessage_div.offsetWidth*0.5) + 'px';
+	}
+		SetPositionNewMessageDiv();
+	
+	
+	function SetPositionGroupNewsDiv(){
+		// Get the divs that I need
+		var Gruppen_div = document.getElementById('menuitem5');
+		var GroupNews_div = document.getElementById('NewsInGroupDiv');
+
+		var Obj = Gruppen_div;   //Get position of "Botendienst"-Div
+		var Pos_Left = 0;
+		var Pos_Top = 0;
+		while (Obj){
+			Pos_Left += Obj.offsetLeft;
+			Pos_Top += Obj.offsetTop;
+			Obj = Obj.offsetParent;
+		}
+
+		// Set new position of the "NewMessage_div"
+		GroupNews_div.style.top = (Pos_Top-GroupNews_div.offsetHeight*0.4) + 'px';
+		GroupNews_div.style.left = (Pos_Left+Gruppen_div.offsetWidth-GroupNews_div.offsetWidth*0.5) + 'px';
+	}
+	SetPositionGroupNewsDiv();	
+	
+	
+	function SetPositionGildenNewsDiv(){
+		// Get the divs that I need
+		var Gilden_div = document.getElementById('menuitem8');
+		var GildenNews_div = document.getElementById('NewsInGildenDiv');
+
+		var Obj = Gilden_div;   //Get position of "Botendienst"-Div
+		var Pos_Left = 0;
+		var Pos_Top = 0;
+		while (Obj){
+			Pos_Left += Obj.offsetLeft;
+			Pos_Top += Obj.offsetTop;
+			Obj = Obj.offsetParent;
+		}
+
+		// Set new position of the "NewMessage_div"
+		GildenNews_div.style.top = (Pos_Top-GildenNews_div.offsetHeight*0.4) + 'px';
+		GildenNews_div.style.left = (Pos_Left+Gilden_div.offsetWidth-GildenNews_div.offsetWidth*0.5) + 'px';
+	}
+
+	SetPositionGildenNewsDiv();
+
+
+	function SetPositionNewRuhmCharDiv(){
+		// Get the divs that I need
+		var MeineChars_div = document.getElementById('menuitem6');
+		var NewRuhmChar_div = document.getElementById('NewRuhmCharDiv');
+
+		var Obj = MeineChars_div;   //Get position of "Botendienst"-Div
+		var Pos_Left = 0;
+		var Pos_Top = 0;
+		while (Obj){
+			Pos_Left += Obj.offsetLeft;
+			Pos_Top += Obj.offsetTop;
+			Obj = Obj.offsetParent;
+		}
+
+		// Set new position of the "NewMessage_div"
+		NewRuhmChar_div.style.top = (Pos_Top-NewRuhmChar_div.offsetHeight*0.4) + 'px';
+		NewRuhmChar_div.style.left = (Pos_Left+MeineChars_div.offsetWidth-NewRuhmChar_div.offsetWidth*0.5) + 'px';
+	}
+	SetPositionNewRuhmCharDiv();
+
+
+	function SetPositionGalleryNewsDiv() {
+		// Get the divs that I need
+		var Avatar_div = document.getElementById('menuitem2');
+		var GalleryNews_div = document.getElementById('NewsInGallery');
+
+		var Obj = Avatar_div;   //Get position of "Botendienst"-Div
+		var Pos_Left = 0;
+		var Pos_Top = 0;
+		while (Obj){
+			Pos_Left += Obj.offsetLeft;
+			Pos_Top += Obj.offsetTop;
+			Obj = Obj.offsetParent;
+		}
+
+		// Set new position of the "NewMessage_div"
+		GalleryNews_div.style.top = (Pos_Top-GalleryNews_div.offsetHeight*0.4) + 'px';
+		GalleryNews_div.style.left = (Pos_Left+Avatar_div.offsetWidth/2-GalleryNews_div.offsetWidth*0.5) + 'px';
+	}
+	SetPositionGalleryNewsDiv();	
+	
+	
+	function SetPositionNewBarkerDiv() {
+		// Get the divs that I need
+		var Marktpl_div = document.getElementById('menuMarktplatz');
+		var NewBarker_div = document.getElementById('NewBarkerDiv');
+	
+		var Obj = Marktpl_div;   //Get position of "Botendienst"-Div
+		var Pos_Left = 0;
+		var Pos_Top = 0;
+		while (Obj){
+			Pos_Left += Obj.offsetLeft;
+			Pos_Top += Obj.offsetTop;
+			Obj = Obj.offsetParent;
+		}
+	
+		// Set new position of the "NewMessage_div"
+		NewBarker_div.style.top = (Pos_Top-NewBarker_div.offsetHeight*0.4) + 'px';
+		NewBarker_div.style.left = (Pos_Left+Marktpl_div.offsetWidth-NewBarker_div.offsetWidth*0.5) + 'px';
+	}	
+	SetPositionNewBarkerDiv();
+	
+	
+	function SetPositionNewForenDiv() {
+		// Get the divs that I need
+		var Forum_div = document.getElementById('menuForen');
+		var NewForen_div = document.getElementById('NewForenDiv');
+
+		var Obj = Forum_div;   //Get position of "Forum"-Div
+		var Pos_Left = 0;
+		var Pos_Top = 0;
+		while (Obj){
+			Pos_Left += Obj.offsetLeft;
+			Pos_Top += Obj.offsetTop;
+			Obj = Obj.offsetParent;
+		}
+
+		// Set new position of the "NewMessage_div"
+		NewForen_div.style.top = (Pos_Top-NewForen_div.offsetHeight*0.4) + 'px';
+		NewForen_div.style.left = (Pos_Left+Forum_div.offsetWidth-NewForen_div.offsetWidth*0.5) + 'px';
+	}
+	SetPositionNewForenDiv();
+
+
+
+	function SetDivPositions()	{
+		try {
+			SetPositionNewForenDiv();
+		} catch(err) {      }
+		try {										//Alle SetPositions in Try-Blöcke damit falls eine SetPosition Funktion nicht existiert die nÃ¤chste aufgerufen wird
+			SetPositionNewBarkerDiv();
+		} catch(err) {		}
+		try {
+			SetPositionNewMessageDiv();
+		} catch(err) {		}
+		try {
+			SetPositionGroupNewsDiv();
+		} catch(err) {		}
+		try {
+			SetPositionGildenNewsDiv();
+		} catch(err) {		}
+		try {
+			SetPositionGalleryNewsDiv();
+		} catch(err) {		}
+		try {
+			SetPositionNewRuhmCharDiv();
+		} catch(err) {		}
+	}
+	window.onresize = function () {
+		SetDivPositions();
+	}
+	window.onload = function () {
+		SetDivPositions();
+	}
+	window.onchange = function () {
+		SetDivPositions();
+	}
+				
+
+	setTimeout('HideAllttt();', 25);
+	setTimeout('HideAllttt();', 50);
+	setTimeout('HideAllttt();', 100);
+	setTimeout('HideAllttt();', 250);
+	setTimeout('HideAllttt();', 500);
+</script>
+
+
+
+
+
+
+<!-- Piwik -->
+<script type="text/javascript">
+	var pkBaseURL = (("https:" == document.location.protocol) ? "https://stats.rpgorg.net/piwik/" : "http://stats.rpgorg.net/piwik/");
+	document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+	try {
+		var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 1);
+		piwikTracker.trackPageView();
+		piwikTracker.enableLinkTracking();
+	} catch( err ) {}
+</script><noscript><p><img src="http://stats.rpgorg.net/piwik/piwik.php?idsite=1&amp;rec=1" style="border:0" alt="" /></p></noscript>
+<!-- End Piwik Tracking Code -->
+
+
+
+
+
+
+</body>
+</html>

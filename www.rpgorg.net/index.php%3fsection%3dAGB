@@ -1,0 +1,769 @@
+
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//DE"
+       "http://www.rpgOrg.net">
+<html>
+<head>
+	<title>rpgOrg</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+	<meta name="keywords" content="Soziales Netzwerk, Social network, Rollenspiel, community, RPG, LARP, MMO">
+
+	<link rel="shortcut icon" type="image/x-icon" href="images/sonst/favicon.ico" />
+	<link href="style.css" rel="stylesheet" type="text/css">
+	
+	<!-- link calendar files  -->
+	<script language="JavaScript" src="Bauteile/calendar/calendar_eu.js"></script>
+	<link rel="stylesheet" href="Bauteile/calendar/calendar.css">
+</head>
+
+
+
+
+<body BGCOLOR=#550000 BACKGROUND='images/Flueche/.gif' >
+
+
+		
+		<script type='text/javascript'>
+			<!--
+				var d = new Date();
+				var c_hour = d.getHours();
+				var c_min = d.getMinutes();
+				var c_day = d.getDay();
+				if (c_day == 0) {
+					c_day = 7;	// make compatible with sunday in php. There it is 7.
+				}
+				
+				var xmlhttp;
+				if (window.XMLHttpRequest) {   // If client uses Firefox, IE7+ Chrome, Opera, Safari
+					xmlhttp = new XMLHttpRequest();
+				} else {									// Old versions of internet explorer
+					xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+				}
+				
+				xmlhttp.open("GET","Bauteile/set_LocalTime_Session.php?hour_client="+c_hour+"&minute_client="+c_min+"&day_client="+c_day+"&SID=9t1m9fmdu991jral6j81a21aq0",true);
+				xmlhttp.send();
+			//-->
+		</script>
+<script type='text/javascript'>
+					<!--
+						setTimeout ( 'window.location.reload()', 10);
+					//-->
+				</script>	
+	
+	<script type="text/javascript">
+		// ------------------------------------------------
+		//    functions for setting opacity of elements
+		// ------------------------------------------------
+		function FadeOpacity (htmlObjectID, CurrentValue, TargetValue, MillisForFullFade) {
+			setOpacity (htmlObjectID, CurrentValue);
+			var NewValue = CurrentValue  +  (50/MillisForFullFade);
+			if (NewValue > TargetValue) {
+				NewValue = TargetValue;
+			}
+			if (NewValue > CurrentValue) {
+				setTimeout( "FadeOpacity('"+htmlObjectID+"', "+NewValue+", "+TargetValue+", "+MillisForFullFade+");" , 50);
+			}
+		}	
+				
+		function setOpacity (htmlObjectID, opacityValue) {
+			if (window.ActiveXObject) {
+				document.getElementById(htmlObjectID).style.filter = "alpha(opacity=" + opacityValue*100 + ")"; // IE
+			} else {
+				document.getElementById(htmlObjectID).style.opacity = opacityValue; // Gecko/Opera
+			}
+		}
+		
+		function sleep(Millis) {
+			Millis += new Date().getTime();
+			while (new Date() < Millis) {  /* do nothing */  }
+		}
+					
+		// ------------------------------------------------
+		//    reactivates the login using ajax
+		// ------------------------------------------------
+		var lastRefresh = parseInt( new Date().getTime() / 1000 );	// in seconds
+		function RefreshLogin() {
+			var CurrenTime = parseInt( new Date().getTime() / 1000 );	// in seconds
+			if (CurrenTime - lastRefresh > 705) {		// refresh login if only 15 seconds are left until automatic logout
+				lastRefresh = parseInt( new Date().getTime() / 1000 );	// in seconds
+				
+				var xmlhttp;
+				if (window.XMLHttpRequest) {	// code for IE7+, Firefox, Chrome, Opera, Safari
+					xmlhttp=new XMLHttpRequest();
+				} else {						// code for IE6, IE5
+					xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+				}
+				
+				xmlhttp.open("GET","Ajax/RefreshLogin/RefreshLogin.php?SID=9t1m9fmdu991jral6j81a21aq0", true);
+				xmlhttp.send();		// load the php-page
+			}
+			setTimeout('RefreshLogin()', 5000);   	// call function again in 5 seconds
+		}
+		
+		
+		
+		// ------------------------------------------------
+		//          Functions to handle new events
+		// ------------------------------------------------
+		var lastRefresh_NewEvents = parseInt( 0 );	// in seconds  (set to zero to make sure it is called immidiately)
+		function RefreshNewEvents() {
+			var CurrenTime = parseInt( new Date().getTime() / 1000 );	// in seconds
+			if (CurrenTime - lastRefresh_NewEvents > 600) {		// check for news if last check is more than RefreshNewEventsTimeout ago
+				lastRefresh_NewEvents = parseInt( new Date().getTime() / 1000 );	// in seconds
+				
+				var xmlhttp;
+				if (window.XMLHttpRequest) {	// code for IE7+, Firefox, Chrome, Opera, Safari
+					xmlhttp=new XMLHttpRequest();
+				} else {						// code for IE6, IE5
+					xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+				}
+				
+				xmlhttp.onreadystatechange = function() {
+			  		if (xmlhttp.readyState==4 && xmlhttp.status==200) {	// when loaded:
+						eval( xmlhttp.responseText );
+				 	}
+				}
+				
+				xmlhttp.open("GET","Ajax/RefreshLogin/CheckForNews.php?SID=9t1m9fmdu991jral6j81a21aq0", true);
+				xmlhttp.send();		// load the php-page
+			}
+
+			setTimeout('RefreshNewEvents()', 5000);   	// call function again in 5 seconds
+		}
+		
+		
+		try {
+			NewsAlertObject = new Audio("");			// starts to load sound file when page is loaded
+			ChatAlertObject = new Audio("");			// starts to load sound file when page is loaded
+			if ( (NewsAlertObject.canPlayType("audio/wav")!='no') && (NewsAlertObject.canPlayType("audio/wav")!='') ) {
+				NewsAlertObject = new Audio("NewsAlert.wav"); 		// check if WAVE is suppoerted
+				ChatAlertObject = new Audio("http://chat.rpgorg.net/bird.wav"); 		// check if WAVE is suppoerted
+			} else if ( (NewsAlertObject.canPlayType("audio/mp3")!='no') && (NewsAlertObject.canPlayType("audio/mp3")!='') ) {
+				NewsAlertObject = new Audio("NewsAlert.mp3"); 		// check if MP3 is suppoerted
+				ChatAlertObject = new Audio("http://chat.rpgorg.net/bird.mp3"); 		// check if MP3 is suppoerted
+			} else if ( (NewsAlertObject.canPlayType("audio/ogg")!='no') && (NewsAlertObject.canPlayType("audio/ogg")!='') ) {
+				NewsAlertObject = new Audio("NewsAlert.ogg"); 		// check if OGG is suppoerted
+				ChatAlertObject = new Audio("http://chat.rpgorg.net/bird.ogg"); 		// check if OGG is suppoerted
+			}
+		} catch (e) { }
+		function PlayNewsAlert () {
+			try {	// try method 1	
+				NewsAlertObject.play();
+			} catch (e) {
+			}
+		}
+		function PlayChatAlert () {
+			try {	// try method 1	
+				ChatAlertObject.play();
+			} catch (e) {
+			}
+		}
+	
+		var step_ShowNewsInTitle = 1;
+		var timer_ShowNewsInTitle;
+		function ShowNewsInTitle() {
+			clearTimeout(timer_ShowNewsInTitle);	// makes sure only that there are not two overlapping executions
+			if (focused == false) {		// show animation only if window is not focused
+				switch (step_ShowNewsInTitle) {
+					case 1: document.title = "NEUIGKEITEN"; 
+							break;
+					case 2: document.title = "rpgOrg";
+							step_ShowNewsInTitle = 0;
+							break;				   
+				}
+				step_ShowNewsInTitle++;
+				timer_ShowNewsInTitle = setTimeout("ShowNewsInTitle()", 1250);
+			} else {
+				document.title = "rpgOrg";
+			}
+		}
+		
+		// Function to check weather tab has the focus. Variable "focused" will contain the information if currently focused or not
+		var focused = true;
+		function onBlur() {
+			focused = false;
+		};
+		function onFocus(){
+			focused = true;
+		};
+		if (/*@cc_on!@*/false) { 		// Internet Explorer
+			document.onfocusin = onFocus;
+			document.onfocusout = onBlur;
+		} else {									// Firefox
+			window.onfocus = onFocus;
+			window.onblur = onBlur;
+		}		
+		
+		
+		
+		function HideAllttt() {
+			try {
+				ttt_objects = document.getElementsByClassName("My_ttt");
+				for(i=0; i<ttt_objects.length; i++) {  
+					ttt_objects[i].style.display = "none";  
+				} 
+			} catch (e) { }
+		}
+
+
+
+
+
+	(
+		function(window, document, undefined) {
+			var My_ttt = function( element, Config_, ttt_object) {
+				var config = {
+					id: Config_.id|| undefined,
+					className: Config_.className || undefined,
+					text: Config_.text || undefined
+				};
+				var over_event = function(event) {
+					ttt_object.style.display = "block";
+				},
+				out_event = function(event) {
+					ttt_object.style.display = "none";
+				},
+				move_event = function(event) {
+					event = event ? event : window.event;
+					if ( event.pageX == null && event.clientX != null ) {
+						event.pageX = event.clientX + (document.documentElement && document.documentElement.scrollLeft || document.body && document.body.scrollLeft || 0) - (document.documentElement && document.documentElement.clientLeft || document.body && document.body.clientLeft || 0);
+						event.pageY = event.clientY + (document.documentElement && document.documentElement.scrollTop  || document.body && document.body.scrollTop  || 0) - (document.documentElement && document.documentElement.clientTop  || document.body && document.body.clientTop  || 0);
+					}
+					
+					//Set Y Position of ttt-DIV
+					if (event.pageY-window.pageYOffset > 0.66*window.innerHeight) {
+						ttt_object.style.top = (event.pageY-ttt_object.offsetHeight-8) + "px";
+					} else {
+						ttt_object.style.top = (event.pageY+20) + "px";
+					}
+					//Set Y Position of ttt-DIV
+					if (event.pageX-window.pageXOffset > 0.66*window.innerWidth) {
+						ttt_object.style.left = (event.pageX-ttt_object.offsetWidth-8) + "px";
+					} else {
+						ttt_object.style.left = (event.pageX+20) + "px";
+					}
+				}
+				if (ttt_object === undefined && config.id) {
+					ttt_object = document.getElementById(config.id);
+					if (ttt_object) ttt_object = ttt_object.parentNode.removeChild(ttt_object)
+				}
+				if (ttt_object === undefined && config.text) {
+					ttt_object = document.createElement("div");
+					if (config.id) ttt_object.id= config.id;
+					ttt_object.innerHTML = config.text;
+				}
+				if (config.className) ttt_object.className = config.className;
+				ttt_object = document.body.appendChild(ttt_object);
+				ttt_object.style.position = "absolute";
+				// define functions that are called on mouse events
+				element.onmouseover = over_event;
+				element.onmouseout = out_event;
+				element.onmousemove = move_event;
+				over_event();
+			};
+			window.My_ttt = window.XBT = My_ttt;
+		}
+	)
+	
+	(
+		this, this.document
+	);
+
+	</script>
+
+		<center>
+
+			<noscript>	
+				<div style='color:red; background-color:black'>
+					<br>
+					<b>Bei deinem Browser ist JavaScript deaktiviert! <br>
+					Bitte aktiviere es, um diese Website in vollem Umfang nutzen zu können.</b>
+					<br><br>
+				</div>
+			</noscript>
+
+
+			<table border="0" cellspacing="0" cellpadding="0" height="159" style="width:500px; table-layout:fixed;">
+				<tr>
+					<td width="240" height="159" style="text-align:right; background-image:url(images/bg/rolle/bg_obenl.gif)" valign="bottom">
+					</td>
+					<td width="640" style="background-image:url(images/bg/rolle/bg_obenm.gif)"> 
+						<table border="0" cellspacing="0" cellpadding="0">
+							<tr width="640"> 
+								<td rowspan='2' width='170' style='text-align:center;'> <a class="WhiteRedHover" href="index.php?section=Home"><img src='images/bg/rolle/orkkopf.gif' alt=''/></a> </td>
+								<td width="405" height="90"> <img src='images/bg/rolle/titel.gif' alt='rpgOrg - Dein RPG-Organizer'/> </td>
+								<td width='65'><br><form method='post' name='set_language_form'>
+																<input type="hidden" name='set_language'/>
+																<input type='hidden' name='token' value='bad0908fcff011d5d86dc5313a678bbd'>
+																<input type="image" src="images/sonst/flag_de_de.gif" onclick='document.set_language_form.set_language.value="de"; document.set_language_form.submit();'/>  <br>
+																<input type="image" src="images/sonst/flag_en_de.gif" onclick='document.set_language_form.set_language.value="en"; document.set_language_form.submit();'/>
+															</form>
+								</td>
+							</tr>
+							<tr> 
+								<td colspan='2'>
+									
+<div align="right"> 
+
+
+
+	<DIV style='display: inline'><a href='index.php?section=VeranstAll&Year=2014&Month=2&Day=7'><img src='images/menu/veranst.gif' style='border: 0px' alt='Events'></a></DIV>
+				&nbsp;&nbsp; 
+				<DIV style='display: inline'><a href='index.php?section=RankingOverview'><img src='images/menu/ranking.gif' style='border: 0px' alt='Ranking'></a></DIV> 
+				&nbsp; &nbsp; 
+				<DIV style='display:inline'><a href='index.php?section=Foren'><img id='menuForen' src='images/menu/foren.gif' style='border:0px' alt='Foren'></a></DIV> 
+				&nbsp; &nbsp; 
+				<DIV style='display: inline'><a href='index.php?section=Login'><img src='images/menu/login.gif' style='border: 0px' alt='Login'></a></DIV>
+				&nbsp; &nbsp; 
+				<br>
+				<img src='images/Login/Finger_right.gif' align='top'>&nbsp;&nbsp;<i><a class='DarkRedWithHover' href='index.php?section=tour_1'><Font size='+1'>Was ist rpgOrg? Schau dir unsere Tour an.</Font></a></i>&nbsp; &nbsp; 
+</div>
+
+
+<div id="NewBarkerDiv"  style="line-height: 160%; display: none; position: absolute; border: 0px black solid; width:28px; height:25px; background-image: url(images/menu/sprechbl.gif); text-align:center;" onmouseover="XBT(this, {id:'ttt_NewBarker'})"> </div>
+<div id="NewForenDiv"  style="line-height: 160%; display: none; position: absolute; border: 0px black solid; width:28px; height:25px; background-image: url(images/menu/sprechbl.gif); text-align:center;" onmouseover="XBT(this, {id:'ttt_NewForen'})"> </div>
+
+<div id="ttt_NewBarker" class="My_ttt" style="padding: 10px; max-width: 400px; border:1px solid #000000; background-image: url(images/ttt/ttt_bg.jpg)">
+	Neuigkeiten auf dem Marktplatz.
+</div>
+<div id="ttt_NewForen" class="My_ttt" style="padding: 10px; max-width: 400px; border:1px solid #000000; background-image: url(images/ttt/ttt_bg.jpg)">
+	Neuigkeiten in den Foren.
+</div>								</td>
+							</tr>
+						</table>
+					</td>
+					<td width="96" style="background-image:url(images/bg/rolle/bg_obenr.gif)"></td>
+				</tr>
+				<tr>
+					<td width="200" valign=top style="height:450px; padding:20px;"> <br><br><br><br><br><img src="images/bg_left/wuerfel_5.gif" style="border: 0px" alt=""> </td>
+					<td width="600" valign=top style="padding:20px; overflow:hidden; background-image:url(images/bg/rolle/bg_mitte.jpg)"> 
+						<FONT SIZE=+2> Allgemeine Geschäftsbedingungen (AGB) </FONT> 
+
+<br><br>
+<b> Stand:</b> 30.7.2012
+<br>
+<p align="justify">„<i>rpgOrg</i>" bezeichnet den vertragsgegenständlichen Dienst und/oder die <i>rpgOrg</i> GbR.</p>
+
+<br>
+
+<b>Präambel</b>
+<p align="justify">Mit der Anmeldung als Nutzer bei <i>rpgOrg</i> akzeptieren Sie die nachfolgenden Allgemeinen Geschäftsbedingungen für die Nutzung von <i>rpgOrg</i> (im Folgenden die „AGB" genannt).</p> 
+<p align="justify"><i>rpgOrg</i> betreibt unter verschiedenen Top-Level-Domains (.org, .de, .net, .at, .ch) die Dienste von <i>rpgOrg</i>. Alle Websites, auf denen <i>rpgOrg</i> die Dienste von <i>rpgOrg</i> zur Verfügung stellt, werden im Folgenden insgesamt die „<i>rpgOrg</i>-Websites" genannt.</p>
+<p align="justify">Diese <a href="http://www.rpgorg.net/index.php?section=AGB"><i>AGB</i></a> regeln das Vertragsverhältnis zwischen dem Nutzer und <i>rpgOrg</i>, unabhängig davon, auf welcher der <i>rpgOrg</i>-Websites sich der Nutzer registriert oder einloggt. Der Nutzer schließt den Vertrag über die Nutzung der Dienste von <i>rpgOrg</i> mit der <i>rpgOrg</i> GbR.</p>
+<p align="justify">Weitere Kontaktdaten sowie die Namen der vertretungsberechtigten Personen der <i>rpgOrg</i> GbR können dem <a href="http://www.rpgorg.net/index.php?section=Impressum"><i>Impressum</i></a> entnommen werden.</p> 
+<p align="justify">Das Angebot der Dienste von <i>rpgOrg</i> richtet sich ausschließlich an geschäftsfähige  Personen im Sinne des Bürgerlichen Rechts über 18 Jahre. Der Nutzer kann diese <a href="http://www.rpgorg.net/index.php?section=AGB"><i>AGB</i></a> jederzeit, auch nach Vertragsabschluss, über diesen <a href="http://www.rpgorg.net/index.php?section=AGB"><i>Link</i></a> aufrufen, ausdrucken sowie herunterladen bzw. speichern. </p> 
+<br>
+
+<b>1. Gegenstand</b>
+<p align="justify"><b>1.1</b> Jegliche Nutzung der auf den <i>rpgOrg</i>-Websites angebotenen Dienste und Inhalte mit Ausnahme der von <i>rpgOrg</i> bereitgestellten Möglichkeiten bedarf der vorherigen schriftlichen Zustimmung durch <i>rpgOrg</i>. </p>
+<p align="justify"><b>1.2</b> Sämtliche Funktionen, Inhalte oder sonstige Dienste, welche <i>rpgOrg</i> auf den <i>rpgOrg</i>-Websites anbietet, unterliegen dem Geltungsbereich dieser <a href="http://www.rpgorg.net/index.php?section=AGB"><i>AGB</i></a>. Bestimmte Funktionen, Inhalte oder sonstige Dienste können die Zustimmung des Nutzers zu zusätzlichen Bedingungen nötig machen. Vor einer Nutzung einer solchen Funktion, Inhalts oder sonstigen Dienstes wird der Nutzer rechtzeitig von <i>rpgOrg</i> auf bestehende Zusatzbedingungen aufmerksam gemacht. </p>
+<p align="justify"><b>1.3</b> Die Nutzung bestimmter Anwendungen von <i>rpgOrg</i> – insbesondere derjenigen, die das Akzeptieren von Zusatzbedingungen oder eine gesonderte Zustimmung voraussetzen – kann auf bestimmte Nutzer und/oder Nutzergruppen beschränkt sein.</p>
+<p align="justify"><b>1.4</b> <i>rpgOrg</i> stellt die vom Nutzer bereitgestellten Daten und/oder Informationen den anderen Nutzern nur zur Verfügung, soweit diese Daten und/oder Informationen nicht gegen gesetzliche Vorschriften oder diese <a href="http://www.rpgorg.net/index.php?section=AGB"><i>AGB</i></a> verstoßen. <i>rpgOrg</i> ist berechtigt, rechtswidrige Inhalte ohne Vorankündigung von den <i>rpgOrg</i>-Websites zu entfernen. </p>
+<p align="justify"><b>1.5</b> Der Nutzer erkennt an, dass eine 100%ige Verfügbarkeit der <i>rpgOrg</i>-Websites technisch nicht zu realisieren ist. <i>rpgOrg</i> bemüht sich jedoch, die <i>rpgOrg</i>-Websites möglichst konstant verfügbar zu halten. Insbesondere Wartungs-, Sicherheits- oder Kapazitätsbelange sowie Ereignisse, die nicht im Machtbereich von <i>rpgOrg</i> stehen (wie z.B. Störungen von öffentlichen Kommunikationsnetzen, Stromausfälle etc.), können zu kurzzeitigen Störungen oder zur vorübergehenden Einstellung der Dienste auf den <i>rpgOrg</i>-Websites führen.</p>
+<p align="justify"><b>1.6</b> <i>rpgOrg</i> bietet dem Nutzer lediglich eine Plattform an, um ihn mit anderen Nutzern zusammenzuführen, und stellt hierfür nur solche technischen Applikationen bereit, die eine generelle Kontaktaufnahme der Nutzer untereinander ermöglichen. <i>rpgOrg</i> beteiligt sich inhaltlich nicht an der Kommunikation der Nutzer untereinander. Sofern die Nutzer über die <i>rpgOrg</i>-Websites Verträge untereinander schließen, ist <i>rpgOrg</i> hieran nicht beteiligt und wird daher kein Vertragspartner. Die Nutzer sind für die Abwicklung und die Erfüllung der untereinander geschlossenen Verträge allein verantwortlich. <i>rpgOrg</i> haftet nicht, falls über die <i>rpgOrg</i>-Websites im Zusammenhang mit einem solchen Vertrag kein Kontakt zwischen den Nutzern zustande kommt. <i>rpgOrg</i> haftet ferner nicht für Pflichtverletzungen der Nutzer aus den zwischen den Nutzern geschlossenen Verträgen.</p>
+<p align="justify"><b>1.7</b> Die <i>rpgOrg</i> GbR hat das alleinige Recht, auf <i>rpgOrg</i> basierende und/oder abgeleitete Werke zu erstellen. Jegliche Weiterverwendung von Inhalten oder Grafiken von <i>rpgOrg</i> ist nur mit schriftlicher Erlaubnis der <i>rpgOrg</i> GbR gestattet. Niemand mit Ausnahme der <i>rpgOrg</i> GbR hat das Recht, Inhalte von <i>rpgOrg</i> zu verkaufen. Weder ist es erlaubt, ein Profil zu kaufen, zu verkaufen oder zu tauschen, noch ist es erlaubt, virtuelle Güter (wie Ehrgeschenke, Gold, Charaktere etc.) oder virtuelle Dienstleistungen (wie Marktschreier verwenden, Forumsbeiträge verfassen, etc.), die auf <i>rpgOrg</i> genutzt werden, außerhalb von <i>rpgOrg</i> für eine reale Währung (Geld) zu kaufen, zu verkaufen oder zu tauschen.</p>
+<p align="justify"><b>1.8</b> Den Administratoren („Meister“) der Spielgruppen bzw. Gilden steht ein Auswahlrecht bezüglich ihrer Mitglieder zu. Sie können frei entscheiden, wen sie als Mitglied in ihre Spielgruppe bzw. Gilde aufnehmen möchten. Bereits aufgenommene Mitglieder können jederzeit ohne die Angabe von Gründen wieder entfernt werden. Die Administratoren von Spielgruppen und Gilden besitzen außerdem das Recht Beiträge auf Spielgruppen/Gilden-internen Pinnwänden, Terminen und Foren zu verändern oder zu löschen.</p>
+<br>
+
+<b>2. Registrierung, Zusicherungen bei der Registrierung</b>
+<p align="justify"><b>2.1</b> Der Nutzer muss sich vor Inanspruchnahme der Dienste der <i>rpgOrg</i>-Websites, die einer Anmeldung bedürfen, registrieren. Diese Registrierung ist kostenlos. Dienste, die keiner Anmeldung bedürfen, dürfen ohne eine Anmeldung benutzt werden (Beispiele: Veranstaltungen und Foren einsehen, Kontaktformular ist ohne Anmeldung nutzbar).  </p>
+<p align="justify"><b>2.2</b> Der Nutzer sichert zu, dass alle von ihm bei der Registrierung angegebenen Daten wahr und vollständig sind. Der Nutzer ist verpflichtet, <i>rpgOrg</i> Änderungen seiner Nutzerdaten unverzüglich anzuzeigen. </p>
+<p align="justify"><b>2.3</b> Zur Registrierung zugelassen sind nur unbeschränkt geschäftsfähige natürliche Personen nach Vollendung des 18. Lebensjahres. Registriert sich eine Person unter Verstoß gegen diese Klausel (illegale Registrierung), ist <i>rpgOrg</i> berechtigt, den betreffenden Account ohne Ankündigung sofort zu löschen.</p>
+<p align="justify"><b>2.4</b> Bei der Anmeldung wählt der Nutzer einen Benutzernamen und ein Passwort. Er ist verpflichtet, sein Passwort geheim zu halten. <i>rpgOrg</i> wird das Passwort nicht an Dritte weitergeben und den Nutzer zu keinem Zeitpunkt außerhalb der <i>rpgOrg</i>-Websites und auf keinem Fall per Email nach dem Passwort fragen. </p>
+<p align="justify"><b>2.5</b> Die Nutzung aller Dienste von <i>rpgOrg</i> ist nur nach abgeschlossener Registrierung möglich. Der Nutzer hat die im Rahmen der Registrierung abgefragten Daten vollständig und korrekt anzuzeigen. Die Verwendung von Künstlernamen, Pseudonymen oder sonstigen Phantasiebezeichnungen als Benutzername ist dabei ausdrücklich erlaubt. Die tatsächlichen Personalien müssen nicht angegeben werden. Untersagt ist es jedoch, einen Account mit fremden oder irreführenden Angaben anzumelden. Entsprechend werden Profile, die eine andere als die tatsächliche Identität des Nutzers widerspiegeln, ohne Ankündigung sofort gelöscht.</p>
+<p align="justify"><b>2.6</b> <i>rpgOrg</i> wird den Zugang der über das Registrierungsformular übermittelten Daten unverzüglich per E-Mail an die vom Nutzer bei der Registrierung angegebene E-Mail-Adresse bestätigen. Die Registrierung ist erst dann erfolgreich abgeschlossen, wenn der Nutzer diese mit Hilfe des ihm zugesandten Aktivierungs-Links bestätigt. </p>
+<p align="justify"><b>2.7</b> Mit dem Abschluss des Registrierungsvorganges durch Aufrufen des Aktivierungs-Links gibt der Nutzer ein Angebot zum Abschluss des Vertrages über die Nutzung der Dienste der <i>rpgOrg</i>-Websites ab. <i>rpgOrg</i> nimmt dieses Angebot durch Freischaltung des Nutzers für die Dienste der <i>rpgOrg</i>-Websites an. Erst durch diese Annahme in Form der Freischaltung kommt der Vertrag zwischen dem Nutzer und <i>rpgOrg</i> zustande. </p>
+<p align="justify"><b>2.8</b> Der Nutzer hat nach dem erfolgreichen Abschluss der Registrierung die Möglichkeit, die Dienste von <i>rpgOrg</i> über den Login-Bereich zu nutzen. Die E-Mail oder der Nutzername und das vom Nutzer selbst bestimmte Passwort sind dabei in die entsprechend gekennzeichneten Felder einzutragen.</p>
+<p align="justify"><b>2.9</b> <i>rpgOrg</i> ist zum Löschen des Accounts einschließlich aller bis dahin gemachten Angaben berechtigt, sofern die Registrierung nicht vollständig durchgeführt oder der Aktivierungs-Link nicht innerhalb von 24 Stunden bestätigt wird.</p>
+<p align="justify"><b>2.10</b> Auf den Abschluss eines Nutzungsvertrages besteht keinerlei Anspruch. <i>rpgOrg</i> kann eine Registrierung auch ohne Angabe von Gründen ablehnen. Die durch den Nutzer mit dem Registrierungsformular übermittelten Daten werden in einem solchen Fall unverzüglich gelöscht.</p>
+<p align="justify"><b>2.11</b> Jeder Nutzer darf sich nur einmal registrieren und nur ein Nutzerprofil (auch „Avatar“ genannt) anlegen. Derartige Profile sind nicht übertragbar. Mit einer Registrierung versichert der Nutzer gleichzeitig, dass er noch kein Mitglied bei <i>rpgOrg</i> ist oder alle früheren Accounts gelöscht hat. </p>
+<p align="justify"><b>2.12</b> Ein Profil darf nicht zum Handel oder Kauf angeboten werden. Ein Verstoß hiergegen berechtigt <i>rpgOrg</i> zur fristlosen Kündigung verbunden mit einer permanenten Löschung des Profils. Sollte <i>rpgOrg</i> weitere Profile finden, die ein- und derselben Person zuzuordnen sind, werden diese permanent gesperrt oder unterliegen anderen Sanktionen für den Verstoß gegen die Nutzungsbedingungen, wie unter Ziffer 7.3 beschrieben. </p>
+<p align="justify"><b>2.13</b> <i>rpgOrg</i> kann technisch nicht mit Sicherheit feststellen, ob ein auf den <i>rpgOrg</i>-Websites angemeldeter Nutzer tatsächlich diejenige Person darstellt, die der Nutzer vorgibt zu sein. <i>rpgOrg</i> leistet daher keine Gewähr für die tatsächliche Identität eines Nutzers. Jeder Nutzer hat sich daher selbst von der Identität eines anderen Nutzers zu überzeugen. </p>
+<br>
+
+<b>3. Dienste von <i>rpgOrg</i></b>
+<p align="justify"><b>3.1</b> <i>rpgOrg</i> dient der Kommunikation und der Selbstdarstellung des Nutzers. Der Nutzer kann mit <i>rpgOrg</i> bestehende Freundschaften pflegen und neue Bekanntschaften schließen, sich zu Spielgruppen zusammenschließen und diese per Terminplanung koordinieren. Über sein Profil kann sich der Nutzen den anderen Nutzern präsentieren. <i>rpgOrg</i> bietet dem Nutzer zur Umsetzung eine Vielzahl von Funktionen und Möglichkeiten an. Hier eine (nicht abschließende) Auswahl der Funktionen: </p> 
+<ul>
+<li> Nachrichtensystem 
+<li> Fotogalerien
+<li> Ehrgeschenke
+<li> Profil mit Profilbild
+<li> Ticker („Marktschreier“)
+<li> Erfahrungsgrad
+<li> Gold
+<li> Flüche
+<li> Freundesverwaltung
+<li> Diverse Foren
+<li> Rankings
+<li> Mehrere Suchfunktionen
+<li> Spielgruppen
+<li> Terminplanung
+<li> Veranstaltungsplanung und -suche
+<li> Erfolge
+</ul>
+<p align="justify"><i>rpgOrg</i> bietet dem Nutzer die Infrastruktur für Kommunikation, Präsentation und Vernetzung, nimmt aber nicht an dieser Teil. Der Nutzer hat keinerlei Ansprüche auf eine Zurverfügungstellung einzelner Funktionen. Nähere Angaben und Informationen zu den einzelnen Anwendungen des <i>rpgOrg</i>-Netzwerkes lassen sich auf den <i>rpgOrg</i>-Websites in der Rubrik „Hilfe“ finden.</p>
+<p align="justify"><b>3.2</b> <i>rpgOrg</i> verfügt über ein internes Erfahrungs- und Gold-System. Außerdem werden anhand der erworbenen Erfahrungspunkte Grade vergeben. Abhängig von verschiedenen Faktoren wie beispielsweise Aktivität erhalten unsere Nutzer symbolische Erfahrungspunkte und Gold. Die zugrundeliegende Berechnung für die Vergabe von Erfahrungspunkten und Gold ist geheim. Gold ist eine Art internes Zahlungsmittel, mit dem man sich zusätzliche eigene Funktionen freischalten oder Geschenke bzw. Flüche an andere Nutzer verteilen kann. Es besteht keinerlei Anspruch auf den Erhalt eines bestimmten Grades oder einer bestimmten Menge Gold von <i>rpgOrg</i>.</p>
+<p align="justify"><b>3.3</b>Bei Gold und Ehrgeschenken handelt es sich um symbolische virtuelle Währungen und Gegenstände. Der Nutzer hat keinerlei Anspruch auf den Erhalt von Gold und Ehrgeschenken außerhalb der <i>rpgOrg</i>-Websites oder in Realform. </p>
+<p align="justify"><b>3.4</b> <i>rpgOrg</i> ist bestrebt, seine Dienste kontinuierlich weiterzuentwickeln. Im Rahmen dieser Weiterentwicklungen werden die Dienste von <i>rpgOrg</i> wie auch einzelne Anwendungen verbessert und/oder erweitert werden. Dennoch bleibt die maximale Menge der pro Nutzer abzuspeichernden Daten beschränkt.</p>
+<p align="justify"><b>3.5</b> <i>rpgOrg</i> wird den Nutzer unter anderem darauf aufmerksam machen, falls er fremde Inhalte und Anwendungen Dritter (nachfolgend „Drittinhalte“) abfragt, die nicht auf den Servern von <i>rpgOrg</i> gespeichert sind. Insbesondere finden dafür auch so genannte Hyperlinks Anwendung. Solche Drittinhalte sind durch einen entsprechenden Hinweis, z.B. „Anzeige“, kenntlich gemacht. Sofern und soweit im Zusammenhang mit diesen Drittinhalten der Abschluss eines Vertrages angeboten wird, kommt dieser bei Abschluss desselben ausschließlich mit dem jeweils als Anbieter ausgewiesenen Verantwortlichen zustande und nicht mit <i>rpgOrg</i>.</p>
+<br>
+
+<b>4. Pflichten des Nutzers</b>
+<p align="justify"><b>4.1</b> Der Nutzer ist verpflichtet: </p>
+<p align="justify"><b>4.1.1</b> ausschließlich zutreffende, nicht irreführende Angaben in seinem Profil und seiner Kommunikation mit anderen Nutzern zu machen.</p>
+<p align="justify"><b>4.1.2</b> nur Fotos an die <i>rpgOrg</i>-Websites zu übermitteln, an denen er selbst alle für eine Veröffentlichung benötigten Rechte besitzt. Der Nutzer stellt sicher, dass die öffentliche Wiedergabe der von ihm übermittelten Fotos auf den <i>rpgOrg</i>-Websites erlaubt ist. Die vom Nutzer übermittelten Fotos dürfen keine Firmenlogos enthalten. Auch Spielgruppen-, Charakter-, Galerie- und Gildenbilder dürfen keine Firmenlogos enthalten. Weiteres zum Hochladen von Bildern findet sich im Abschnitt 5 dieser <a href="http://www.rpgorg.net/index.php?section=AGB"><i>AGB</i></a>. </p>
+<p align="justify"><b>4.1.3</b> bei der Nutzung der Inhalte und Dienste auf den <i>rpgOrg</i>-Websites die anwendbaren Gesetze sowie alle Rechte Dritter zu beachten. Es ist dem Nutzer insbesondere untersagt, beleidigende oder verleumderische Inhalte zu erstellen, unabhängig davon, ob diese Inhalte andere Nutzer, <i>rpgOrg</i>-Mitarbeiter oder andere Personen oder Unternehmen betreffen. Weiterhin ist es dem Nutzer untersagt, pornografische oder gegen Jugendschutzgesetze der Bundesrepublik Deutschland verstoßende Inhalte zu verwenden oder pornografische oder gegen Jugendschutzgesetze verstoßende Produkte zu bewerben, anzubieten oder zu vertreiben, andere Nutzer unzumutbar (insbesondere durch Spam) zu belästigen (vgl. § 7 Gesetz gegen den unlauteren Wettbewerb UWG), gesetzlich (z.B. durch das Urheber-, Marken-, Patent-, Geschmacksmuster- oder Gebrauchsmusterrecht) geschützte Inhalte zu verwenden, ohne dazu berechtigt zu sein, oder gesetzlich geschützte Waren oder Dienstleistungen zu bewerben, anzubieten oder zu vertreiben sowie wettbewerbswidrige Handlungen vorzunehmen oder zu fördern. Dieses Verbot schließt progressive Kundenwerbung (wie Ketten-, Schneeball- oder Pyramidensysteme) mit ein. </p>
+<p align="justify"><b>4.1.4</b> die folgenden belästigenden Handlungen sind dem Nutzer, auch dann untersagt, wenn diese konkret keine Gesetze verletzen sollten: </p>
+<ul>
+<li>Versendung von Kettenbriefen, 
+<li>Durchführung, Bewerbung und Förderung von Strukturvertriebsmaßnahmen (wie Multi-Level-Marketing oder Multi-Level-Network-Marketing) oder 
+<li>anzügliche oder sexuell geprägte Kommunikation (explizit oder implizit).
+</ul> 
+<p align="justify"><b>4.2</b> Dem Nutzer untersagt ist die Verwendung von Mechanismen, Software oder Scripts in Verbindung mit der Nutzung der <i>rpgOrg</i>-Websites. Der Nutzer darf nur die Schnittstellen oder Software nutzen, die ihm im Rahmen der auf den <i>rpgOrg</i>-Websites angebotenen Dienste von <i>rpgOrg</i> zur Verfügung gestellt werden. Untersagt ist auch ein Blockieren, Überschreiben, Modifizieren und Kopieren der Inhalte und des Erscheinungsbildes von <i>rpgOrg</i>, soweit dies nicht für die ordnungsgemäße Nutzung der Dienste der <i>rpgOrg</i>-Websites erforderlich ist. Das Kopieren im Wege von „Robot/Crawler"-Suchmaschinen-Technologien sowie das Verwenden von „Werbung/Add“-Blockern ist z.B. nicht erforderlich für die ordnungsgemäße Nutzung der Dienste der <i>rpgOrg</i>-Websites und daher ausdrücklich untersagt. Weiterhin untersagt ist die Verbreitung und öffentliche Wiedergabe von Inhalten der <i>rpgOrg</i>-Websites oder von anderen Nutzern sowie jede Handlung, die geeignet ist, die Funktionalität der <i>rpgOrg</i>-Infrastruktur zu beeinträchtigen, insbesondere diese übermäßig zu belasten. </p>
+<p align="justify"><b>4.3</b> Verstößt der Nutzer gegen Pflichten dieser Klausel, ist <i>rpgOrg</i> berechtigt, einen pflichtwidrigen Inhalt ohne vorherige Benachrichtigung zu löschen. Bei fortgesetzten Verstößen ist <i>rpgOrg</i> berechtigt, nach dem dritten Verstoß den zu dem Nutzer bestehenden Vertrag ohne weitere Angaben von Gründen fristlos zu kündigen und den Account des Nutzers zu löschen. <i>rpgOrg</i> wird den Nutzer nach jedem Verstoß über die vorgenommenen Sanktionen per E-Mail unterrichten.</p>
+<br>
+
+<b>5. Upload von Bilddateien</b>
+<p align="justify"><b>5.1</b> Dem eigenen Profil („Avatar“), erstellten Spielercharakteren, erstellten Veranstaltungen und der eigenen Galerie kann jeder Nutzer Bilddateien hinzufügen, indem er diese Dateien über die <i>rpgOrg</i>-Websites hochlädt. Der Gründer oder Verwalter einer Spielgruppe oder einer Gilde innerhalb von <i>rpgOrg</i> hat ebenfalls die Möglichkeit, eine Bilddatei zu der von ihm gegründeten bzw. verwalteten Gruppe bzw. Gilde hochzuladen. Der Nutzer hat vor dem Upload einer Bilddatei sicherzustellen, dass ihm an dem Foto bzw. der Datei die ausschließlichen Nutzungsrechte zustehen. Die hochgeladene Datei darf außerdem nicht gegen gesetzliche Vorschriften, die guten Sitten, gegen die Rechte Dritter  und/oder die Verhaltensregeln von <i>rpgOrg</i> verstoßen. </p>
+<p align="justify"><b>5.2</b> Über die <i>rpgOrg</i>-Websites Bilddateien mit Gewaltdarstellungen hochzuladen und/oder öffentlich zugänglich zu machen ist verboten. Weiterhin dürfen die hochgeladenen Bilddateien keine sexuellen, pornografischen, diskriminierenden, beleidigenden, rassistischen, verleumderischen oder sonstig rechtswidrigen Inhalte oder Darstellungen beinhalten. Derartige Darstellungen sind auch in keinster Weise in stigmatisierter Form als Symbole (z.B. Hakenkreuz), Runen, militärischen Abzeichen (z.B. Waffen-SS) Wasserzeichen oder schwer erkennbaren verwaschenen Zeichnungen erlaubt. Genauso ist es untersagt, Bilddateien hochzuladen, auf denen ausschließlich oder nur unter anderem Firmen-, Marken- oder sonstige Geschäftszeichen bzw. andere geschützte Zeichen dargestellt werden. </p>
+<p align="justify"><b>5.3</b> <i>rpgOrg</i> ist berechtigt, Bilddateien auch ohne Vorankündigung zu löschen, soweit sich seitens <i>rpgOrg</i> konkrete Anhaltspunkte dafür ergeben, dass durch die öffentliche Verfügbarkeit einer Bilddatei über das <i>rpgOrg</i>-Netzwerk gegen gesetzliche Vorschriften, die guten Sitten gegen Rechte Dritte und/oder einen anderen in dieser <a href="http://www.rpgorg.net/index.php?section=AGB"><i>AGB</i></a> genannten Punkt verstoßen wird. Bei fortgesetzten Verstößen ist <i>rpgOrg</i> berechtigt, nach dem dritten Verstoß den zu dem Nutzer bestehenden Vertrag ohne weitere Angaben von Gründen fristlos zu kündigen und den Account des Nutzers zu löschen. <i>rpgOrg</i> wird den Nutzer nach jedem Verstoß über die vorgenommenen Sanktionen per email unterrichten.</p>
+<p align="justify"><b>5.4</b> Der Nutzer kann eine Bilddatei, die er hochgeladen hat, jederzeit mit Wirkung für die Zukunft wieder entfernen.</p>
+<p align="justify"><b>5.5</b> Der Nutzer gewährt <i>rpgOrg</i> und seinen eigenen Freunden („Weggefährten“) das Recht, sein Profilbild durch sogenannte Flüche kurzzeitig (maximal bis zu 2 Wochen) zu verändern. Während dieser Zeit kann der Nutzer kein neues Profilbild setzen. </p>
+<br>
+
+<b>6. Änderungen der Dienste auf den <i>rpgOrg</i>-Websites</b>
+<p align="justify"><i>rpgOrg</i> wird kontinuierlich weiterentwickelt und ist berechtigt immer wieder neue Funktionen einzuführen bzw. alte Funktionen anzupassen oder auch zu beenden. Entsprechend ist <i>rpgOrg</i> berechtigt, die auf den <i>rpgOrg</i>-Websites angebotenen Dienste zu ändern oder abweichende Dienste anzubieten, außer dies ist für den Nutzer nicht zumutbar.</p>
+<br>
+ 
+<b>7. Beendigung des Vertrags</b>
+<p align="justify"><b>7.1</b> Ferner kann der Vertrag beiderseitig außerordentlich ohne Einhaltung einer Kündigungsfrist gekündigt werden, wenn ein wichtiger Grund i.S.d. § 626 BGB vorliegt. </p>
+<p align="justify"><b>7.2</b> Der Nutzer kann die Mitgliedschaft überdies jederzeit ohne Angabe von Gründen mit sofortiger Wirkung kündigen, in dem er sein Profil über die <a href="http://www.rpgorg.net/index.php?section=EditAvatarEinstellungen"><i>Profileinstellungen</i></a>  löscht. Weiterhin kann eine Kündigung schriftlich an die im Impressum genannte Kontaktadresse sowie über das <a href="http://www.rpgorg.de/index.php?section=Contact"><i>Kontaktformular</i></a> von <i>rpgOrg</i> vorgenommen werden, allerdings wird auf diesen Wegen eine Verzögerung bis zur Löschung des Profils entstehen. Bei der schriftlichen Kündigung sowie bei der Kündigung über das <a href="http://www.rpgorg.de/index.php?section=Contact"><i>Kontaktformular</i></a> sind außerdem der Benutzername, das aktuelle Passwort und die auf den <i>rpgOrg</i>-Websites registrierte E-Mail-Adresse des Nutzers anzugeben.</p> 
+<p align="justify"><b>7.3</b> <i>rpgOrg</i> ist berechtigt, unabhängig von einer Kündigung nach Ziffer 7.1 - insbesondere bei Pflichtverstößen des Nutzers nach den Klauseln 4 und 5 - die folgenden Sanktionen gegen den Nutzer zu verhängen, wenn dieser gegen die Nutzungsbestimmungen von <i>rpgOrg</i> verstößt: Löschung von Inhalten, die der Nutzer eingestellt hat, Ausspruch einer Abmahnung, Sperrung des Zugangs zu den Diensten der <i>rpgOrg</i>-Websites oder fristlose Löschung des Profils.</p>
+<p align="justify"><b>7.4</b> Darüber hinaus kann <i>rpgOrg</i> den Nutzungsvertrag jederzeit kündigen, allerdings unter der Wahrung einer Frist von vierzehn Tagen zum Monatsende. Nach Ablauf dieser Frist erfolgt die Löschung des Accounts. Das Recht der Kündigung aus wichtigem Grund bzw. zur Sperrung oder Löschen eines Nutzers nach an den Bestimmungen dieser <a href="http://www.rpgorg.net/index.php?section=AGB"><i>AGB</i></a> bleiben hiervon unberührt. </p>
+<br>
+
+<b>8. Verantwortlichkeit für Inhalte, Daten und/oder Informationen der Nutzer</b>
+<p align="justify"><b>8.1</b> <i>rpgOrg</i> übernimmt keine Verantwortung für die von den Nutzern der <i>rpgOrg</i>-Websites bereitgestellten Inhalte, Daten und/oder Informationen sowie für Inhalte auf verlinkten externen Websites. <i>rpgOrg</i> gewährleistet insbesondere nicht, dass diese Inhalte wahr sind, einen von dem Nutzer behaupteten oder bestimmten Zweck erfüllen oder einem solchen Zweck dienen können. Es liegt folglich in der Verantwortung des Nutzers sicherzustellen, dass die entsprechenden Inhalte rechtmäßig sind, vor allem nicht gegen geltende Gesetze verstoßen und keine Rechte Dritter verletzen. Inhalte über das <i>rpgOrg</i>-Netzwerk zugänglich zu machen oder zu verbreiten, sofern und soweit mit diesen gegen gesetzliche Vorschriften, Rechte Dritter oder gegen die guten Sitten verstoßen wird, ist verboten. </p>
+<p align="justify"><b>8.2</b> Es gilt darüber hinaus die für alle Nutzer verbindlichen Verhaltensregeln für die Nutzung der <i>rpgOrg</i>-Websites zu beachten, der auch strenger sein kann als geltende gesetzliche Vorschriften und der <a href="http://www.rpgorg.net/index.php?section=VRegeln"><i>hier</i></a> abrufbar ist. Mit der Zustimmungserklärung zu diesen <a href="http://www.rpgorg.net/index.php?section=AGB"><i>AGB</i></a> erkennt der Nutzer diese Verhaltensregeln an. <i>rpgOrg</i> ist berechtigt, einen gegen die Verhaltensregeln verstoßenden Inhalt auch dann ohne vorherige Anhörung und Benachrichtigung des Nutzers zu löschen, wenn die fragliche Handlung noch nicht die Schwelle einer Pflichtverletzung nach Ziffer 4 oder 5 dieser <a href="http://www.rpgorg.net/index.php?section=AGB"><i>AGB</i></a> überschreitet. Bei fortgesetzten Verstößen gegen die Verhaltensregeln, die jeder für sich noch nicht als eine Pflichtverletzung gem. Ziffer 4 oder 5 dieser <a href="http://www.rpgorg.net/index.php?section=AGB"><i>AGB</i></a> zu werten sind, ist <i>rpgOrg</i> berechtigt, nach dem fünften Verstoß den zu dem Nutzer bestehenden Vertrag ohne weitere Angaben von Gründen zu kündigen und den Account des Nutzers zu löschen. <i>rpgOrg</i> wird den Nutzer nach jedem Verstoß über die vorgenommenen Sanktionen per email unterrichten.</p>
+<p align="justify"><b>8.3</b> Soweit der Nutzer eine gesetzes- oder vertragswidrige Benutzung der <i>rpgOrg</i>-Websites (einschließlich der Verwendung von täuschenden Identitäten) bemerkt, kann er diese mit dem auf den <i>rpgOrg</i>-Websites von jeder Seite aus erreichbaren <a href="http://www.rpgorg.net/index.php?section=Contact"><i>Kontaktformular</i></a>  melden. </p>
+<p align="justify"><b>8.4</b> Alle von den Nutzern eingestellten Inhalte werden von <i>rpgOrg</i> grundsätzlich nicht proaktiv kontrolliert. Eine solche Kontrolle ist tatsächlich nicht möglich und ohne konkrete Hinweise auf eine Rechtsverletzung nicht zumutbar. <i>rpgOrg</i> behält sich jedoch die Berechtigung vor (ohne dazu verpflichtet zu sein), Inhalte wie Freundeslisten, Profiltexte, Marktschreier, Foren etc. zu kontrollieren und im Verdachtsfall einer Nutzung entgegen der Nutzungsbedingungen nicht öffentliche Bereiche wie Fotogalerien, private Spielgruppen und Gilden, etc. einzusehen. Bei positiver Kenntnis darüber, dass durch Inhalte von Nutzern/durch Verlinkung Rechte verletzt werden, wird <i>rpgOrg</i> diese Inhalte/Verlinkung innerhalb einer angemessenen Zeit entfernen und alle möglichen und zumutbaren Vorkehrungen treffen, um eine identische Rechtsverletzung für die Zukunft zu unterbinden.</p>
+<br>
+
+<b>9. Kundendienst/Support</b>
+<p align="justify">Der Kunde kann Fragen und Erklärungen zu seinem Vertrag mit <i>rpgOrg</i> oder zu den Diensten von <i>rpgOrg</i> über das auf den <i>rpgOrg</i>-Websites von jeder Seite aus erreichbare Kontaktformular oder Brief übermitteln. </p>
+<br>
+
+<b>10. Haftung von <i>rpgOrg</i></b>
+<p align="justify"><i>rpgOrg</i> haftet für Vorsatz und grobe Fahrlässigkeit. Ferner haftet <i>rpgOrg</i> für die fahrlässige Verletzung von Pflichten, deren Erfüllung die ordnungsgemäße Durchführung des Vertrages überhaupt erst ermöglichen und auf deren Einhaltung der Nutzer regelmäßig vertraut, in diesem Fall jedoch nur für den vorhersehbaren, vertragstypischen Schaden (also z.B. nicht für die Folgen von Hackerangriffen). Für die leicht fahrlässige Verletzung anderer als in den vorstehenden Sätzen genannter Pflichten haftet <i>rpgOrg</i> nicht. Die vorstehenden Haftungsausschlüsse gelten nicht bei Verletzung von Leben, Körper und Gesundheit.</p>
+<br>
+
+<b>11. Freistellung </b>
+<p align="justify"><b>11.1</b> Der Nutzer stellt <i>rpgOrg</i> von sämtlichen Ansprüchen, einschließlich Schadensersatzansprüchen, frei, die andere Nutzer oder sonstige Dritte gegen <i>rpgOrg</i> wegen einer Verletzung ihrer Rechte durch die vom Nutzer auf den <i>rpgOrg</i>-Websites eingestellten Inhalte geltend machen. Der Nutzer stellt <i>rpgOrg</i> ferner von sämtlichen Ansprüchen, einschließlich Schadensersatzansprüchen, frei, die andere Nutzer oder sonstige Dritte gegen <i>rpgOrg</i> wegen der Verletzung ihrer Rechte durch die Nutzung der Dienste der <i>rpgOrg</i>-Websites durch den Nutzer geltend machen. Der Nutzer übernimmt alle <i>rpgOrg</i> aufgrund einer Verletzung von Rechten Dritter entstehenden angemessenen Kosten, einschließlich der für die Rechtsverteidigung entstehenden angemessenen Kosten. Alle weitergehenden Rechte sowie Schadensersatzansprüche von <i>rpgOrg</i> bleiben unberührt. Die vorstehenden Pflichten des Nutzers gelten nicht, soweit der Nutzer die betreffende Rechtsverletzung nicht zu vertreten hat. </p>
+<p align="justify"><b>11.2</b> Werden durch die Inhalte des Nutzers Rechte Dritter verletzt, wird der Nutzer <i>rpgOrg</i> nach Wahl von <i>rpgOrg</i> auf eigene Kosten des Nutzers das Recht zur Nutzung der Inhalte verschaffen oder die Inhalte schutzrechtsfrei gestalten. Werden durch die Nutzung der Dienste der <i>rpgOrg</i>-Websites durch den Nutzer Rechte Dritter verletzt, muss der Nutzer die vertragswidrige und/oder gesetzwidrige Nutzung nach Aufforderung durch <i>rpgOrg</i> sofort einstellen. </p>
+<br>
+
+<b>12. Datenschutz</b>
+<p align="justify"><i>rpgOrg</i> ist sich bewusst, dass den Nutzern ein besonders sensibler Umgang mit allen personenbezogenen Daten, die die Nutzer an <i>rpgOrg</i> übermitteln, äußerst wichtig ist. <i>rpgOrg</i> beachtet daher alle einschlägigen gesetzlichen Datenschutzvorgaben. <i>rpgOrg</i> gibt personenbezogenen Daten der Nutzer nicht unbefugt an Dritte weiter oder bringt sie Dritten sonst wie unbefugt zur Kenntnis. Einzelheiten zur Verarbeitung der Daten der Nutzer sind in den Datenschutzbestimmungen von <i>rpgOrg</i> geregelt, die von jeder der <i>rpgOrg</i>-Websites aus erreichbar sind. Mit Anerkennung dieser <a href="http://www.rpgorg.net/index.php?section=AGB"><i>AGB</i></a> stimmt der Nutzer auch den Datenschutzbedingungen zu. </p>
+<br>
+
+<b>13. Rechte an Inhalten</b>
+<p align="justify"><b>13.1</b> Eine Vervielfältigung oder Verwendung der Beiträge oder Inhalte der <i>rpgOrg</i>-Websites in anderen elektronischen oder gedruckten Publikationen ist ohne ausdrückliche schriftliche Einwilligung von <i>rpgOrg</i> nicht gestattet. Das Kopieren, Herunterladen, Verbreiten und Vertreiben sowie Speichern von Inhalten der <i>rpgOrg</i>-Websites ist, mit Ausnahme des Cachens zum Beschleunigen der Datenverarbeitung, ohne ausdrückliche Einwilligung seitens <i>rpgOrg</i> nicht gestattet. </p>
+<p align="justify"><b>13.2</b> Einträge, die Nutzer in Foren veröffentlichen sowie Ankündigungen zu Veranstaltungen können, über die bei <i>rpgOrg</i> registrierten Benutzer hinausgehend, auch einer breiteren Öffentlichkeit  zugänglich gemacht werden.</p>
+<br>
+
+<b>14. Schlussbestimmungen </b>
+<p align="justify"><b>14.1</b> Der Vertrag und seine Änderungen bedürfen der Schriftform. Nebenabreden bestehen nicht. Auch die Änderung der Schriftformklausel unterliegt der Schriftform. </p>
+<p align="justify"><b>14.2</b> <i>rpgOrg</i> behält sich vor, diese <a href="http://www.rpgorg.net/index.php?section=AGB"><i>AGB</i></a> jederzeit und ohne Nennung von Gründen zu ändern, es sei denn, dies ist für den Nutzer unzumutbar. <i>rpgOrg</i> wird den Nutzer über Änderungen der <a href="http://www.rpgorg.net/index.php?section=AGB"><i>AGB</i></a> rechtzeitig benachrichtigen. Widerspricht der Nutzer der Geltung der neuen <a href="http://www.rpgorg.net/index.php?section=AGB"><i>AGB</i></a> nicht innerhalb von sechs (6) Wochen nach der Benachrichtigung, gelten die geänderten <a href="http://www.rpgorg.net/index.php?section=AGB"><i>AGB</i></a> als vom Nutzer angenommen. <i>rpgOrg</i> wird den Nutzer in der Benachrichtigung auf sein Widerspruchsrecht und die Bedeutung der Widerspruchsfrist hinweisen.</p>
+<p align="justify"><b>14.3</b> Soweit nichts anderes vereinbart ist, kann der Nutzer alle Erklärungen an <i>rpgOrg</i> per E-Mail mit dem von jeder der <i>rpgOrg</i>-Websites aus erreichbaren Kontaktformular abgeben oder diese schriftlich an die im Impressum genannte Adresse von <i>rpgOrg</i> übermitteln. <i>rpgOrg</i> kann Erklärungen gegenüber dem Nutzer per E-Mail oder Brief an die Adressen übermitteln, die der Nutzer als aktuelle Kontaktdaten in seinem Nutzerkonto angegeben hat. </p>
+<p align="justify"><b>14.4</b> Sollten einzelne Regelungen dieser <a href="http://www.rpgorg.net/index.php?section=AGB"><i>AGB</i></a> unwirksam sein oder werden, wird dadurch die Wirksamkeit der übrigen Regelungen nicht berührt. Die Vertragspartner verpflichten sich, eine unwirksame Regelung durch eine solche wirksame Regelung zu ersetzen, die in ihrem Regelungsgehalt dem wirtschaftlich gewollten Sinn und Zweck der unwirksamen Regelung möglichst nahe kommt. Das gilt entsprechend bei Vertragslücken.</p>
+<p align="justify"><b>14.5</b> <i>rpgOrg</i> kann sich auch Dritter als sogenannte Erfüllungsgehilfe bedienen um die vertraglich von <i>rpgOrg</i> geschuldeten Leistungen zu erbringen. Entsprechend können Dritte anstelle von <i>rpgOrg</i> in die sich aus dem geschlossenen Vertrag ergebenden Rechte und Pflichten ganz oder teilweise unter Einhaltung einer Vorankündigungsfrist von einem Monat eintreten. Der Nutzer ist in einem solchen Fall befugt, sich durch Kündigung des Vertragsverhältnisses gegenüber <i>rpgOrg</i> ohne Angabe von Gründen zu lösen (siehe hierzu auch Ziffer 7) </p>
+<p align="justify"><b>14.6</b> Erfüllungsort ist der Sitz von <i>rpgOrg</i>. </p>
+<p align="justify"><b>14.7</b> Sofern der Nutzer keinen allgemeinen Gerichtsstand im Inland hat oder nach Vertragsschluss seinen Wohnsitz ins Ausland verlegt oder sein Wohnsitz zum Zeitpunkt der Klageerhebung nicht bekannt ist, ist Gerichtsstand für alle Streitigkeiten der Sitz von <i>rpgOrg</i> in Ratekau bei Lübeck.</p>
+<p align="justify"><b>14.8</b> Auf die vorliegenden Nutzungsbedingungen und das Rechtsverhältnis zwischen <i>rpgOrg</i> und dem Nutzer findet ausschließlich das Recht der Bundesrepublik Deutschland unter Ausschluss der Regelungen des internationalen Privatrechts (IPR) und des UN-Kaufrechts (CISG) Anwendung. Diese Rechtswahl gilt gegenüber Verbrauchern jedoch nur insoweit, als nicht der gewährte Schutz durch zwingende Bestimmungen des Rechts des Staates, in dem der Verbraucher seinen gewöhnlichen Aufenthalt hat, entzogen wird. Zwingende Bestimmungen des Staates, in dem der Nutzer seinen gewöhnlichen Aufenthalt hat, bleiben unberührt </p>
+<br>
+
+<b>Widerrufsbelehrung</b>
+<p align="justify">Der Nutzer kann seine Vertragserklärung innerhalb von zwei Wochen ohne Angabe von Gründen in Textform (z.B. Brief, E-Mail) widerrufen. Die Frist beginnt nach Erhalt dieser Belehrung in Textform, jedoch nicht vor Vertragsschluss und auch nicht vor Erfüllung der Informationspflichten gemäß § 312 c Abs. 2 BGB i.V.m. § 1 Abs. 1, 2 und 4 BGB-InfoV sowie  der Pflichten gemäß § 312 e Abs. 1 S. 1 BGB i.V.m. § 3 BGB-InfoV. Zur Wahrung der Widerrufsfrist genügt die rechtzeitige Absendung des Widerrufs. Der Widerruf ist zu richten an die im <a href="http://www.rpgorg.net/index.php?section=Impressum"><i>Impressum</i></a> angegebene Adresse oder per E-mail an: <br>
+<img src='images/inhalt/webm.gif' align='top'></p>
+<br>
+
+<b>Widerrufsfolgen</b>
+<p align="justify">Im Falle eines wirksamen Widerrufs sind die beiderseits empfangenen Leistungen zurück zu gewähren und ggf. gezogene Nutzungen (z.B. Zinsen) herauszugeben. Kann der Nutzer die empfangene Leistung an <i>rpgOrg</i> ganz oder teilweise nicht oder nur in verschlechtertem Zustand zurückgewähren, muss der Nutzer insoweit ggf. Wertersatz leisten. Verpflichtungen zur Erstattung von Zahlungen müssen innerhalb von 30 Tagen erfüllt werden. Die Frist beginnt für den Nutzer mit der Absendung Ihrer Widerrufserklärung, für <i>rpgOrg</i> mit deren Empfang. </p>
+<br>
+
+<b>Besondere Hinweise</b>
+<p align="justify">Das Widerrufsrecht des Nutzers erlischt vorzeitig, wenn der Vertrag von beiden Seiten und auf ausdrücklichen Wunsch des Nutzers vollständig erfüllt ist, bevor er sein Widerrufsrecht ausgeübt hat. </p>
+
+
+
+
+	
+	
+ 
+					</td>
+					<td></td>
+				</tr>
+				<tr valign="top">
+					<td width="240" height="195" valign="top"> &nbsp; </td>
+					<td colspan='2' width="640" valign="top" height="60" style="background-image:url(images/bg/rolle/bg_unten.gif)"> 
+						<table border='0'>
+							<tr height='98'></tr>	
+							<tr>
+								<td width='205'></td>					
+								<td><br>
+
+<div align="right" style='white-space:nowrap;'> <a href="index.php?section=About">Über uns</a> &nbsp; <a href="index.php?section=Contact">Kontakt</a> &nbsp; <a href="index.php?section=VRegeln">Verhaltensregeln</a> &nbsp; <a href="index.php?section=Datenschutz">Datenschutz</a> &nbsp; <a href="index.php?section=AGB">AGB</a> &nbsp; <a href="index.php?section=Impressum">Impressum</a> &nbsp; &nbsp; </div></td>					
+							</tr>			
+						</table>
+						
+					</td>
+				</tr>
+			</table>
+		
+		</center>
+
+
+
+
+
+
+<script language ='JavaScript'>
+
+	function SetPositionHomeNewsDiv() {
+		// Get the divs that I need
+		var Home_div = document.getElementById('menuitem1');
+		var HomeNews_div = document.getElementById('NewsInHome');
+
+		var Obj = Home_div;
+		var Pos_Left = 0;
+		var Pos_Top = 0;
+		while (Obj){
+			Pos_Left += Obj.offsetLeft;
+			Pos_Top += Obj.offsetTop;
+			Obj = Obj.offsetParent;
+		}
+
+		// Set new position of the "NewMessage_div"
+		HomeNews_div.style.top = (Pos_Top-Home_div.offsetHeight*0.4) + 'px';
+		HomeNews_div.style.left = (Pos_Left+Home_div.offsetWidth-HomeNews_div.offsetWidth*0.5) + 'px';
+	}
+	document.getElementById('NewsInHome').innerHTML = "&nbsp; &nbsp;";
+		SetPositionHomeNewsDiv();
+		
+		
+	function SetPositionNewMessageDiv() {
+		// Get the divs that I need
+		var Botend_div = document.getElementById('menuitem7');
+		var NewMessage_div = document.getElementById('NewMessagesDiv');
+
+		var Obj = Botend_div;   //Get position of "Botendienst"-Div
+		var Pos_Left = 0;
+		var Pos_Top = 0;
+		while (Obj){
+			Pos_Left += Obj.offsetLeft;
+			Pos_Top += Obj.offsetTop;
+			Obj = Obj.offsetParent;
+		}
+
+		// Set new position of the "NewMessage_div"
+		NewMessage_div.style.top = (Pos_Top-NewMessage_div.offsetHeight*0.4) + 'px';
+		NewMessage_div.style.left = (Pos_Left+Botend_div.offsetWidth-NewMessage_div.offsetWidth*0.5) + 'px';
+	}
+		SetPositionNewMessageDiv();
+	
+	
+	function SetPositionGroupNewsDiv(){
+		// Get the divs that I need
+		var Gruppen_div = document.getElementById('menuitem5');
+		var GroupNews_div = document.getElementById('NewsInGroupDiv');
+
+		var Obj = Gruppen_div;   //Get position of "Botendienst"-Div
+		var Pos_Left = 0;
+		var Pos_Top = 0;
+		while (Obj){
+			Pos_Left += Obj.offsetLeft;
+			Pos_Top += Obj.offsetTop;
+			Obj = Obj.offsetParent;
+		}
+
+		// Set new position of the "NewMessage_div"
+		GroupNews_div.style.top = (Pos_Top-GroupNews_div.offsetHeight*0.4) + 'px';
+		GroupNews_div.style.left = (Pos_Left+Gruppen_div.offsetWidth-GroupNews_div.offsetWidth*0.5) + 'px';
+	}
+	SetPositionGroupNewsDiv();	
+	
+	
+	function SetPositionGildenNewsDiv(){
+		// Get the divs that I need
+		var Gilden_div = document.getElementById('menuitem8');
+		var GildenNews_div = document.getElementById('NewsInGildenDiv');
+
+		var Obj = Gilden_div;   //Get position of "Botendienst"-Div
+		var Pos_Left = 0;
+		var Pos_Top = 0;
+		while (Obj){
+			Pos_Left += Obj.offsetLeft;
+			Pos_Top += Obj.offsetTop;
+			Obj = Obj.offsetParent;
+		}
+
+		// Set new position of the "NewMessage_div"
+		GildenNews_div.style.top = (Pos_Top-GildenNews_div.offsetHeight*0.4) + 'px';
+		GildenNews_div.style.left = (Pos_Left+Gilden_div.offsetWidth-GildenNews_div.offsetWidth*0.5) + 'px';
+	}
+
+	SetPositionGildenNewsDiv();
+
+
+	function SetPositionNewRuhmCharDiv(){
+		// Get the divs that I need
+		var MeineChars_div = document.getElementById('menuitem6');
+		var NewRuhmChar_div = document.getElementById('NewRuhmCharDiv');
+
+		var Obj = MeineChars_div;   //Get position of "Botendienst"-Div
+		var Pos_Left = 0;
+		var Pos_Top = 0;
+		while (Obj){
+			Pos_Left += Obj.offsetLeft;
+			Pos_Top += Obj.offsetTop;
+			Obj = Obj.offsetParent;
+		}
+
+		// Set new position of the "NewMessage_div"
+		NewRuhmChar_div.style.top = (Pos_Top-NewRuhmChar_div.offsetHeight*0.4) + 'px';
+		NewRuhmChar_div.style.left = (Pos_Left+MeineChars_div.offsetWidth-NewRuhmChar_div.offsetWidth*0.5) + 'px';
+	}
+	SetPositionNewRuhmCharDiv();
+
+
+	function SetPositionGalleryNewsDiv() {
+		// Get the divs that I need
+		var Avatar_div = document.getElementById('menuitem2');
+		var GalleryNews_div = document.getElementById('NewsInGallery');
+
+		var Obj = Avatar_div;   //Get position of "Botendienst"-Div
+		var Pos_Left = 0;
+		var Pos_Top = 0;
+		while (Obj){
+			Pos_Left += Obj.offsetLeft;
+			Pos_Top += Obj.offsetTop;
+			Obj = Obj.offsetParent;
+		}
+
+		// Set new position of the "NewMessage_div"
+		GalleryNews_div.style.top = (Pos_Top-GalleryNews_div.offsetHeight*0.4) + 'px';
+		GalleryNews_div.style.left = (Pos_Left+Avatar_div.offsetWidth/2-GalleryNews_div.offsetWidth*0.5) + 'px';
+	}
+	SetPositionGalleryNewsDiv();	
+	
+	
+	function SetPositionNewBarkerDiv() {
+		// Get the divs that I need
+		var Marktpl_div = document.getElementById('menuMarktplatz');
+		var NewBarker_div = document.getElementById('NewBarkerDiv');
+	
+		var Obj = Marktpl_div;   //Get position of "Botendienst"-Div
+		var Pos_Left = 0;
+		var Pos_Top = 0;
+		while (Obj){
+			Pos_Left += Obj.offsetLeft;
+			Pos_Top += Obj.offsetTop;
+			Obj = Obj.offsetParent;
+		}
+	
+		// Set new position of the "NewMessage_div"
+		NewBarker_div.style.top = (Pos_Top-NewBarker_div.offsetHeight*0.4) + 'px';
+		NewBarker_div.style.left = (Pos_Left+Marktpl_div.offsetWidth-NewBarker_div.offsetWidth*0.5) + 'px';
+	}	
+	SetPositionNewBarkerDiv();
+	
+	
+	function SetPositionNewForenDiv() {
+		// Get the divs that I need
+		var Forum_div = document.getElementById('menuForen');
+		var NewForen_div = document.getElementById('NewForenDiv');
+
+		var Obj = Forum_div;   //Get position of "Forum"-Div
+		var Pos_Left = 0;
+		var Pos_Top = 0;
+		while (Obj){
+			Pos_Left += Obj.offsetLeft;
+			Pos_Top += Obj.offsetTop;
+			Obj = Obj.offsetParent;
+		}
+
+		// Set new position of the "NewMessage_div"
+		NewForen_div.style.top = (Pos_Top-NewForen_div.offsetHeight*0.4) + 'px';
+		NewForen_div.style.left = (Pos_Left+Forum_div.offsetWidth-NewForen_div.offsetWidth*0.5) + 'px';
+	}
+	SetPositionNewForenDiv();
+
+
+
+	function SetDivPositions()	{
+		try {
+			SetPositionNewForenDiv();
+		} catch(err) {      }
+		try {										//Alle SetPositions in Try-Blöcke damit falls eine SetPosition Funktion nicht existiert die nÃ¤chste aufgerufen wird
+			SetPositionNewBarkerDiv();
+		} catch(err) {		}
+		try {
+			SetPositionNewMessageDiv();
+		} catch(err) {		}
+		try {
+			SetPositionGroupNewsDiv();
+		} catch(err) {		}
+		try {
+			SetPositionGildenNewsDiv();
+		} catch(err) {		}
+		try {
+			SetPositionGalleryNewsDiv();
+		} catch(err) {		}
+		try {
+			SetPositionNewRuhmCharDiv();
+		} catch(err) {		}
+	}
+	window.onresize = function () {
+		SetDivPositions();
+	}
+	window.onload = function () {
+		SetDivPositions();
+	}
+	window.onchange = function () {
+		SetDivPositions();
+	}
+				
+
+	setTimeout('HideAllttt();', 25);
+	setTimeout('HideAllttt();', 50);
+	setTimeout('HideAllttt();', 100);
+	setTimeout('HideAllttt();', 250);
+	setTimeout('HideAllttt();', 500);
+</script>
+
+
+
+
+
+
+<!-- Piwik -->
+<script type="text/javascript">
+	var pkBaseURL = (("https:" == document.location.protocol) ? "https://stats.rpgorg.net/piwik/" : "http://stats.rpgorg.net/piwik/");
+	document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+	try {
+		var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 1);
+		piwikTracker.trackPageView();
+		piwikTracker.enableLinkTracking();
+	} catch( err ) {}
+</script><noscript><p><img src="http://stats.rpgorg.net/piwik/piwik.php?idsite=1&amp;rec=1" style="border:0" alt="" /></p></noscript>
+<!-- End Piwik Tracking Code -->
+
+
+
+
+
+
+</body>
+</html>
